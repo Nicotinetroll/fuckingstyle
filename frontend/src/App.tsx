@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import io from 'socket.io-client'
 import './App.css'
 
@@ -11,13 +11,24 @@ interface VoteNotification {
   id: string
   cardId: string
   cardName: string
+  voter: string
   timestamp: number
+}
+
+interface User {
+  id: string
+  name: string
+  color: string
+  x: number
+  y: number
 }
 
 function App() {
   const [votes, setVotes] = useState<Record<string, number>>({})
   const [connected, setConnected] = useState(false)
   const [notifications, setNotifications] = useState<VoteNotification[]>([])
+  const [cursors, setCursors] = useState<Map<string, User>>(new Map())
+  const [activeUsers, setActiveUsers] = useState(0)
   
   const cards = [
     {
@@ -40,10 +51,56 @@ function App() {
     }
   ]
   
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    socket.emit('cursorMove', { 
+      x: e.clientX,
+      y: e.clientY
+    })
+  }, [])
+  
   useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove)
+    
     socket.on('connect', () => {
       console.log('Connected!')
       setConnected(true)
+    })
+    
+    socket.on('users', (users: User[]) => {
+      const newCursors = new Map()
+      users.forEach(user => {
+        if (user.id !== socket.id) {
+          newCursors.set(user.id, user)
+        }
+      })
+      setCursors(newCursors)
+      setActiveUsers(users.length)
+    })
+    
+    socket.on('userJoined', (user: User) => {
+      setCursors(prev => {
+        const updated = new Map(prev)
+        updated.set(user.id, user)
+        return updated
+      })
+      setActiveUsers(prev => prev + 1)
+    })
+    
+    socket.on('userLeft', (userId: string) => {
+      setCursors(prev => {
+        const updated = new Map(prev)
+        updated.delete(userId)
+        return updated
+      })
+      setActiveUsers(prev => Math.max(0, prev - 1))
+    })
+    
+    socket.on('cursorUpdate', (data: User) => {
+      setCursors(prev => {
+        const updated = new Map(prev)
+        updated.set(data.id, data)
+        return updated
+      })
     })
     
     socket.on('voteUpdate', (data: any) => {
@@ -51,11 +108,12 @@ function App() {
       setVotes(prev => ({...prev, [data.cardId]: data.count}))
       
       const card = cards.find(c => c.id === data.cardId)
-      if (card) {
+      if (card && data.voter) {
         const newNotif: VoteNotification = {
           id: Math.random().toString(),
           cardId: data.cardId,
           cardName: card.name,
+          voter: data.voter,
           timestamp: Date.now()
         }
         setNotifications(prev => [newNotif, ...prev].slice(0, 10))
@@ -78,11 +136,16 @@ function App() {
     })
     
     return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
       socket.off('connect')
       socket.off('voteUpdate')
       socket.off('disconnect')
+      socket.off('users')
+      socket.off('userJoined')
+      socket.off('userLeft')
+      socket.off('cursorUpdate')
     }
-  }, [])
+  }, [handleMouseMove])
 
   const handleVote = (cardId: string) => {
     console.log('Voting for:', cardId)
@@ -96,8 +159,67 @@ function App() {
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       padding: '40px 20px',
       fontFamily: 'Arial Black, sans-serif',
-      overflowX: 'hidden'
+      overflowX: 'hidden',
+      position: 'relative'
     }}>
+      {/* Other users' cursors */}
+      {Array.from(cursors.values()).map(cursor => (
+        <div
+          key={cursor.id}
+          style={{
+            position: 'fixed',
+            left: `${cursor.x}px`,
+            top: `${cursor.y}px`,
+            pointerEvents: 'none',
+            zIndex: 9999,
+            transition: 'all 0.1s linear'
+          }}
+        >
+          <svg width="24" height="24">
+            <path
+              d="M0,0 L0,18 L6,14 L10,22 L13,20 L9,12 L16,12 Z"
+              fill={cursor.color}
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          </svg>
+          <span style={{
+            position: 'absolute',
+            top: '24px',
+            left: '12px',
+            background: cursor.color,
+            color: '#fff',
+            padding: '3px 10px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            whiteSpace: 'nowrap',
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+          }}>
+            {cursor.name}
+          </span>
+        </div>
+      ))}
+      
+      {/* Live users counter */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        left: '20px',
+        background: 'rgba(0,0,0,0.8)',
+        color: '#fff',
+        padding: '12px 24px',
+        borderRadius: '25px',
+        fontSize: '18px',
+        zIndex: 1000,
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+      }}>
+        👥 {activeUsers} online
+      </div>
+
       <div className="notifications-container" style={{
         position: 'fixed',
         top: '20px',
@@ -122,7 +244,7 @@ function App() {
               animation: 'slideIn 0.3s ease-out, shake 0.5s ease-in-out'
             }}
           >
-            🔥💸 Someone voted for {notif.cardName}! 💸🔥
+            🔥💸 {notif.voter} voted for {notif.cardName}! 💸🔥
           </div>
         ))}
       </div>

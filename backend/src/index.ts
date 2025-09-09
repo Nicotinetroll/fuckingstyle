@@ -25,8 +25,8 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
+const activeUsers = new Map();
 
-// Vytvor tabuľku
 pool.query(`
   CREATE TABLE IF NOT EXISTS votes (
     id SERIAL PRIMARY KEY,
@@ -38,6 +38,35 @@ pool.query(`
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  
+  const userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+  const userName = 'User' + Math.floor(Math.random() * 9999);
+  
+  activeUsers.set(socket.id, { 
+    id: socket.id, 
+    name: userName, 
+    color: userColor,
+    x: 0,
+    y: 0
+  });
+  
+  socket.emit('users', Array.from(activeUsers.values()));
+  socket.broadcast.emit('userJoined', activeUsers.get(socket.id));
+  
+  socket.on('cursorMove', (data) => {
+    const user = activeUsers.get(socket.id);
+    if (user) {
+      user.x = data.x;
+      user.y = data.y;
+      socket.broadcast.emit('cursorUpdate', {
+        id: socket.id,
+        x: data.x,
+        y: data.y,
+        name: user.name,
+        color: user.color
+      });
+    }
+  });
   
   socket.on('vote', async (data) => {
     console.log('Vote received:', data);
@@ -52,7 +81,8 @@ io.on('connection', (socket) => {
       );
       io.emit('voteUpdate', { 
         cardId: data.cardId, 
-        count: parseInt(result.rows[0].count)
+        count: parseInt(result.rows[0].count),
+        voter: activeUsers.get(socket.id)?.name
       });
     } catch (err) {
       console.error('Vote error:', err);
@@ -61,6 +91,8 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    activeUsers.delete(socket.id);
+    socket.broadcast.emit('userLeft', socket.id);
   });
 });
 
@@ -70,6 +102,7 @@ app.get('/api/health', async (req, res) => {
     res.json({ 
       status: 'OK',
       database: 'PostgreSQL connected',
+      activeUsers: activeUsers.size,
       timestamp: new Date().toISOString()
     });
   } catch (err) {
