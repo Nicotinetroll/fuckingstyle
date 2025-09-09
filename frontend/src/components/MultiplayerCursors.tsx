@@ -16,13 +16,33 @@ interface MultiplayerCursorsProps {
 
 export default function MultiplayerCursors({ socket, onUsersUpdate }: MultiplayerCursorsProps) {
   const [cursors, setCursors] = useState<Map<string, User>>(new Map())
+  const [myPosition, setMyPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [myColor, setMyColor] = useState<string>('#000000')
   const [isMobile, setIsMobile] = useState(false)
   const [userCount, setUserCount] = useState(0)
   const lastEmitTime = useRef(0)
   
+  // Function to determine if text should be white or black based on background
+  const getContrastColor = (hexColor: string): string => {
+    const hex = hexColor.replace('#', '')
+    const r = parseInt(hex.substr(0, 2), 16)
+    const g = parseInt(hex.substr(2, 2), 16)
+    const b = parseInt(hex.substr(4, 2), 16)
+    
+    // Calculate relative luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    
+    // Return black for light colors, white for dark
+    return luminance > 0.5 ? '#000000' : '#FFFFFF'
+  }
+  
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isMobile) return
     
+    // Update own cursor position immediately (no throttling for own cursor)
+    setMyPosition({ x: e.clientX, y: e.clientY })
+    
+    // Throttle network emissions
     const now = Date.now()
     if (now - lastEmitTime.current < 50) return
     lastEmitTime.current = now
@@ -51,8 +71,11 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
     
     socket.on('users', (users: User[]) => {
       const newCursors = new Map()
+      
       users.forEach(user => {
-        if (user.id !== socket.id) {
+        if (user.id === socket.id) {
+          setMyColor(user.color)
+        } else {
           newCursors.set(user.id, user)
         }
       })
@@ -61,11 +84,15 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
     })
     
     socket.on('userJoined', (user: User) => {
-      setCursors(prev => {
-        const updated = new Map(prev)
-        updated.set(user.id, user)
-        return updated
-      })
+      if (user.id === socket.id) {
+        setMyColor(user.color)
+      } else {
+        setCursors(prev => {
+          const updated = new Map(prev)
+          updated.set(user.id, user)
+          return updated
+        })
+      }
       setUserCount(prev => prev + 1)
     })
     
@@ -79,7 +106,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
     })
     
     socket.on('cursorUpdate', (data: User) => {
-      if (!isMobile) {
+      if (!isMobile && data.id !== socket.id) {
         setCursors(prev => {
           const updated = new Map(prev)
           updated.set(data.id, data)
@@ -107,8 +134,72 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
 
   if (isMobile) return null
 
+  const renderCursor = (color: string, x: number, y: number, name?: string, isOwn: boolean = false) => {
+    const textColor = getContrastColor(color)
+    const borderColor = textColor === '#000000' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.25)'
+    
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          left: `${x}px`,
+          top: `${y}px`,
+          pointerEvents: 'none',
+          zIndex: isOwn ? 9998 : 9999,
+          transition: isOwn ? 'none' : 'all 0.08s cubic-bezier(0.25, 0.1, 0.25, 1)',
+          transform: 'translate(0, 0)'
+        }}
+      >
+        {/* Your custom arrow cursor */}
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 32 32"
+          fill="none"
+          style={{
+            filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.16)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12))',
+            transform: 'rotate(-45deg) translate(-6px, -6px)'
+          }}
+        >
+          <path 
+            d="M15.1002 0.85587C15.4646 0.104234 16.5354 0.104231 16.8998 0.855867L30.9913 29.9196C31.3735 30.7079 30.6294 31.5717 29.7933 31.3104L16.2983 27.0932C16.1041 27.0325 15.8959 27.0325 15.7017 27.0932L2.20675 31.3104C1.37062 31.5717 0.626483 30.7079 1.00866 29.9196L15.1002 0.85587Z" 
+            fill={color}
+          />
+        </svg>
+        
+        {/* Name label with colored background - only for other users */}
+        {!isOwn && name && (
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '18px',
+            padding: '5px 10px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: '600',
+            whiteSpace: 'nowrap',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif',
+            letterSpacing: '0.3px',
+            color: textColor,
+            backgroundColor: color,
+            boxShadow: `
+              0 2px 8px rgba(0, 0, 0, 0.15),
+              0 0 0 1px ${borderColor}
+            `
+          }}>
+            {name}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <>
+      {/* Render own cursor without name - no stuttering */}
+      {!isMobile && myColor && renderCursor(myColor, myPosition.x, myPosition.y, undefined, true)}
+      
+      {/* Render other users' cursors */}
       {Array.from(cursors.values()).map(cursor => {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop
@@ -130,42 +221,8 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
         if (!isInViewport) return null
         
         return (
-          <div
-            key={cursor.id}
-            style={{
-              position: 'fixed',
-              left: `${viewportX}px`,
-              top: `${viewportY}px`,
-              pointerEvents: 'none',
-              zIndex: 9999,
-              transition: 'all 0.1s linear',
-              transform: 'translate(-8px, -8px)'
-            }}
-          >
-            <svg width="24" height="24">
-              <path
-                d="M0,0 L0,18 L6,14 L10,22 L13,20 L9,12 L16,12 Z"
-                fill={cursor.color}
-                stroke="#fff"
-                strokeWidth="2"
-              />
-            </svg>
-            <span style={{
-              position: 'absolute',
-              top: '24px',
-              left: '12px',
-              background: cursor.color,
-              color: '#fff',
-              padding: '3px 10px',
-              borderRadius: '12px',
-              fontSize: '13px',
-              whiteSpace: 'nowrap',
-              fontFamily: 'Arial, sans-serif',
-              fontWeight: 'bold',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-            }}>
-              {cursor.name}
-            </span>
+          <div key={cursor.id}>
+            {renderCursor(cursor.color, viewportX, viewportY, cursor.name, false)}
           </div>
         )
       })}
