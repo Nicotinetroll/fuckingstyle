@@ -16,8 +16,6 @@ interface MultiplayerCursorsProps {
 
 export default function MultiplayerCursors({ socket, onUsersUpdate }: MultiplayerCursorsProps) {
   const [cursors, setCursors] = useState<Map<string, User>>(new Map())
-  const [myPosition, setMyPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
-  const [myColor, setMyColor] = useState<string>('#000000')
   const [isMobile, setIsMobile] = useState(false)
   const [userCount, setUserCount] = useState(0)
   const lastEmitTime = useRef(0)
@@ -39,12 +37,9 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isMobile) return
     
-    // Update own cursor position immediately (no throttling for own cursor)
-    setMyPosition({ x: e.clientX, y: e.clientY })
-    
     // Throttle network emissions
     const now = Date.now()
-    if (now - lastEmitTime.current < 50) return
+    if (now - lastEmitTime.current < 30) return
     lastEmitTime.current = now
     
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
@@ -73,9 +68,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
       const newCursors = new Map()
       
       users.forEach(user => {
-        if (user.id === socket.id) {
-          setMyColor(user.color)
-        } else {
+        if (user.id !== socket.id) {
           newCursors.set(user.id, user)
         }
       })
@@ -84,9 +77,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
     })
     
     socket.on('userJoined', (user: User) => {
-      if (user.id === socket.id) {
-        setMyColor(user.color)
-      } else {
+      if (user.id !== socket.id) {
         setCursors(prev => {
           const updated = new Map(prev)
           updated.set(user.id, user)
@@ -134,8 +125,23 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
 
   if (isMobile) return null
 
-  const renderCursor = (color: string, x: number, y: number, name?: string, isOwn: boolean = false) => {
-    const textColor = getContrastColor(color)
+  const renderCursor = (color: string, x: number, y: number, name?: string) => {
+    // Lighten the color for better visibility on dark background
+    const lightenColor = (hex: string): string => {
+      const r = parseInt(hex.substr(1, 2), 16)
+      const g = parseInt(hex.substr(3, 2), 16)
+      const b = parseInt(hex.substr(5, 2), 16)
+      
+      // Lighten by 30%
+      const newR = Math.min(255, r + (255 - r) * 0.3)
+      const newG = Math.min(255, g + (255 - g) * 0.3)
+      const newB = Math.min(255, b + (255 - b) * 0.3)
+      
+      return `#${Math.round(newR).toString(16).padStart(2, '0')}${Math.round(newG).toString(16).padStart(2, '0')}${Math.round(newB).toString(16).padStart(2, '0')}`
+    }
+    
+    const lightColor = lightenColor(color)
+    const textColor = getContrastColor(lightColor)
     const borderColor = textColor === '#000000' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.25)'
     
     return (
@@ -145,8 +151,8 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
           left: `${x}px`,
           top: `${y}px`,
           pointerEvents: 'none',
-          zIndex: isOwn ? 9998 : 9999,
-          transition: isOwn ? 'none' : 'all 0.08s cubic-bezier(0.25, 0.1, 0.25, 1)',
+          zIndex: 9999,
+          transition: 'all 0.05s linear',
           transform: 'translate(0, 0)'
         }}
       >
@@ -163,12 +169,12 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
         >
           <path 
             d="M15.1002 0.85587C15.4646 0.104234 16.5354 0.104231 16.8998 0.855867L30.9913 29.9196C31.3735 30.7079 30.6294 31.5717 29.7933 31.3104L16.2983 27.0932C16.1041 27.0325 15.8959 27.0325 15.7017 27.0932L2.20675 31.3104C1.37062 31.5717 0.626483 30.7079 1.00866 29.9196L15.1002 0.85587Z" 
-            fill={color}
+            fill={lightColor}
           />
         </svg>
         
-        {/* Name label with colored background - only for other users */}
-        {!isOwn && name && (
+        {/* Name label with colored background */}
+        {name && (
           <div style={{
             position: 'absolute',
             top: '20px',
@@ -181,7 +187,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
             fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif',
             letterSpacing: '0.3px',
             color: textColor,
-            backgroundColor: color,
+            backgroundColor: lightColor,
             boxShadow: `
               0 2px 8px rgba(0, 0, 0, 0.15),
               0 0 0 1px ${borderColor}
@@ -196,10 +202,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
 
   return (
     <>
-      {/* Render own cursor without name - no stuttering */}
-      {!isMobile && myColor && renderCursor(myColor, myPosition.x, myPosition.y, undefined, true)}
-      
-      {/* Render other users' cursors */}
+      {/* Only render other users' cursors, not your own */}
       {Array.from(cursors.values()).map(cursor => {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop
@@ -222,7 +225,7 @@ export default function MultiplayerCursors({ socket, onUsersUpdate }: Multiplaye
         
         return (
           <div key={cursor.id}>
-            {renderCursor(cursor.color, viewportX, viewportY, cursor.name, false)}
+            {renderCursor(cursor.color, viewportX, viewportY, cursor.name)}
           </div>
         )
       })}
