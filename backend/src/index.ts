@@ -47,7 +47,9 @@ io.on('connection', (socket) => {
     name: userName, 
     color: userColor,
     x: 50, // Start at center (50%)
-    y: 50  // Start at center (50%)
+    y: 50, // Start at center (50%)
+    message: '',
+    isTyping: false
   });
   
   socket.emit('users', Array.from(activeUsers.values()));
@@ -65,7 +67,23 @@ io.on('connection', (socket) => {
         x: user.x,
         y: user.y,
         name: user.name,
-        color: user.color
+        color: user.color,
+        message: user.message,
+        isTyping: user.isTyping
+      });
+    }
+  });
+  
+  socket.on('userTyping', (data) => {
+    const user = activeUsers.get(socket.id);
+    if (user) {
+      user.message = data.message || '';
+      user.isTyping = data.isTyping || false;
+      
+      socket.broadcast.emit('userTypingUpdate', {
+        id: socket.id,
+        message: user.message,
+        isTyping: user.isTyping
       });
     }
   });
