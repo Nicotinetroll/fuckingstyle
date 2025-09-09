@@ -28,10 +28,21 @@
   50% { box-shadow: 0 20px 60px rgba(255,215,0,0.9); }
 }
 
-body {
+/* Ensure html and body can scroll */
+html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  /* Allow vertical scrolling */
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto !important;
 }
 
 * {
