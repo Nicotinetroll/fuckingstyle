@@ -7,12 +7,38 @@ interface UserInfoPanelProps {
   userColor: string
 }
 
+// Make resetVotes available globally for console access
+declare global {
+  interface Window {
+    resetVotes?: () => void;
+  }
+}
+
 export default function UserInfoPanel({ socket, userName, userColor }: UserInfoPanelProps) {
   const [solAddress, setSolAddress] = useState('')
   const [savedSolAddress, setSavedSolAddress] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [votesRemaining, setVotesRemaining] = useState(10)
   const [, setVotedCards] = useState<string[]>([])
+  
+  // Reset function accessible from console
+  const handleResetVotes = () => {
+    if (confirm('Are you sure you want to reset all your votes? This cannot be undone!')) {
+      localStorage.removeItem('votedCards')
+      setVotedCards([])
+      setVotesRemaining(10)
+      window.location.reload()
+    }
+  }
+  
+  // Make reset function available in console (silently)
+  useEffect(() => {
+    window.resetVotes = handleResetVotes
+    
+    return () => {
+      delete window.resetVotes
+    }
+  }, [])
   
   useEffect(() => {
     // Load saved data from localStorage
@@ -37,10 +63,8 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
       // Vote counting is handled in App.tsx
     })
     
-    socket.on('solAddressUpdated', (data: { success: boolean }) => {
-      if (data.success) {
-        console.log('SOL address updated successfully')
-      }
+    socket.on('solAddressUpdated', (_data: { success: boolean }) => {
+      // Silently handle success
     })
     
     return () => {
@@ -95,15 +119,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
     setSolAddress(savedSolAddress)
   }
   
-  const handleResetVotes = () => {
-    if (confirm('Are you sure you want to reset all your votes? This cannot be undone!')) {
-      localStorage.removeItem('votedCards')
-      setVotedCards([])
-      setVotesRemaining(10)
-      window.location.reload() // Reload to reset the UI
-    }
-  }
-  
   return (
     <div style={{
       position: 'fixed',
@@ -122,7 +137,7 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
         overflow: 'hidden',
         width: '320px'
       }}>
-        {/* Header */}
+        {/* Header with Identity and Votes */}
         <div 
           style={{
             padding: '16px',
@@ -133,6 +148,7 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
             background: `linear-gradient(135deg, ${userColor}15, ${userColor}05)`
           }}
         >
+          {/* Identity Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '8px',
@@ -148,7 +164,7 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
-                Your Identity
+                Identity
               </div>
               <div style={{
                 fontSize: '16px',
@@ -160,77 +176,35 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Content */}
-        <div style={{
-          padding: '16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
-        }}>
-          {/* Votes Remaining */}
+          
+          {/* Votes Section */}
           <div style={{
-            background: votesRemaining > 0 
-              ? 'linear-gradient(135deg, rgba(52, 199, 89, 0.1), rgba(48, 209, 88, 0.05))'
-              : 'linear-gradient(135deg, rgba(255, 59, 48, 0.1), rgba(255, 69, 58, 0.05))',
-            borderRadius: '12px',
-            padding: '12px',
-            border: votesRemaining > 0 
-              ? '1px solid rgba(52, 199, 89, 0.2)'
-              : '1px solid rgba(255, 59, 48, 0.2)',
-            position: 'relative'
+            textAlign: 'right',
+            paddingRight: '4px'
           }}>
             <div style={{
               fontSize: '11px',
               color: 'rgba(255, 255, 255, 0.5)',
-              marginBottom: '4px',
+              marginBottom: '2px',
               textTransform: 'uppercase',
               letterSpacing: '0.5px'
             }}>
-              Votes Remaining
+              Votes Left
             </div>
             <div style={{
-              fontSize: '24px',
+              fontSize: '20px',
               fontWeight: 700,
               color: votesRemaining > 0 ? '#34C759' : '#FF3B30'
             }}>
               {votesRemaining}/10
             </div>
-            
-            {/* Reset Button */}
-            <button
-              onClick={handleResetVotes}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'rgba(255, 59, 48, 0.2)',
-                border: '1px solid rgba(255, 59, 48, 0.3)',
-                borderRadius: '6px',
-                padding: '4px 8px',
-                color: '#FF3B30',
-                fontSize: '10px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 59, 48, 0.3)'
-                e.currentTarget.style.transform = 'scale(1.05)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 59, 48, 0.2)'
-                e.currentTarget.style.transform = 'scale(1)'
-              }}
-            >
-              Reset
-            </button>
           </div>
-          
-          {/* SOL Address Section - ALWAYS VISIBLE */}
+        </div>
+        
+        {/* SOL Address Section */}
+        <div style={{
+          padding: '16px'
+        }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.03)',
             borderRadius: '12px',
@@ -315,22 +289,26 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
                     handleSaveSolAddress()
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
                     borderRadius: '8px',
-                    padding: '8px 16px',
+                    padding: '8px 20px',
                     color: '#fff',
                     fontSize: '13px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
-                    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.4)'
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)'
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.3)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)'
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)'
                   }}
                 >
                   Save
@@ -360,21 +338,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
                 Add your SOL address to receive rewards
               </div>
             )}
-          </div>
-          
-          {/* Debug Info - Temporary */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.02)',
-            borderRadius: '8px',
-            padding: '8px',
-            fontSize: '10px',
-            color: 'rgba(255, 255, 255, 0.4)',
-            fontFamily: 'monospace'
-          }}>
-            <div>Debug Info:</div>
-            <div>User ID: {localStorage.getItem('userId')?.substring(0, 20)}...</div>
-            <div>Votes Used: {10 - votesRemaining}</div>
-            <div>Socket Connected: {socket.connected ? '✅' : '❌'}</div>
           </div>
         </div>
       </div>

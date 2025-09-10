@@ -211,7 +211,6 @@ function App() {
       fetch(`/api/votes/${card.id}`)
         .then(res => res.json())
         .then(data => setVotes(prev => ({...prev, [card.id]: data.count || 0})))
-        .catch(err => console.log('Error loading votes:', err))
     })
     
     return () => {
@@ -222,9 +221,6 @@ function App() {
   }, [])
 
   const handleVote = (cardId: string) => {
-    console.log('Vote button clicked for:', cardId)
-    console.log('Current voted cards:', votedCards)
-    console.log('Socket connected:', socket.connected)
     
     // Check vote limit (allow multiple votes for same candidate)
     if (votedCards.length >= 10) {
@@ -236,11 +232,9 @@ function App() {
     const newVotedCards = [...votedCards, cardId]
     setVotedCards(newVotedCards)
     localStorage.setItem('votedCards', JSON.stringify(newVotedCards))
-    console.log('New voted cards:', newVotedCards)
     
     // Send vote to server
     socket.emit('vote', { cardId })
-    console.log('Vote emitted to server')
     
     // Visual feedback
     setSelectedCard(cardId)

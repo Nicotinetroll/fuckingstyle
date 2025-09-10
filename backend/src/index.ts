@@ -28,7 +28,7 @@ const PORT = process.env.PORT || 3001;
 const activeUsers = new Map();
 const userIdentities = new Map(); // userId -> {name, color, solAddress}
 
-// Funny name generator arrays (keeping them for brevity)
+// Funny name generator arrays
 const adjectives = [
   'Angry', 'Happy', 'Sleepy', 'Bouncy', 'Grumpy', 'Fluffy', 'Sparkly', 'Dizzy', 'Sneaky', 'Giggly',
   'Wobbly', 'Fuzzy', 'Chunky', 'Sassy', 'Cranky', 'Bubbly', 'Wiggly', 'Quirky', 'Nerdy', 'Silly',
@@ -78,18 +78,14 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    
-    console.log('Database tables initialized');
   } catch (err) {
-    console.error('Database initialization error:', err);
+    // Silently handle errors
   }
 }
 
 initDatabase();
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
   // Wait for user identity from client
   socket.on('identify', async (data) => {
     let userId = data.userId;
@@ -101,7 +97,6 @@ io.on('connection', (socket) => {
       userName = identity.name;
       userColor = identity.color;
       solAddress = identity.solAddress;
-      console.log(`Returning user: ${userName} (${userId})`);
     } else {
       // New user - generate identity
       userId = generateUserId();
@@ -123,10 +118,8 @@ io.on('connection', (socket) => {
           [userId, userName, userColor, solAddress]
         );
       } catch (err) {
-        console.error('Error storing user identity:', err);
+        // Silently handle error
       }
-      
-      console.log(`New user created: ${userName} (${userId})`);
     }
     
     activeUsers.set(socket.id, { 
@@ -203,7 +196,6 @@ io.on('connection', (socket) => {
         );
         socket.emit('solAddressUpdated', { success: true });
       } catch (err) {
-        console.error('Error updating SOL address:', err);
         socket.emit('solAddressUpdated', { success: false });
       }
     }
@@ -212,11 +204,8 @@ io.on('connection', (socket) => {
   socket.on('vote', async (data) => {
     const user = activeUsers.get(socket.id);
     if (!user) {
-      console.log('Vote rejected - user not found');
       return;
     }
-    
-    console.log(`Vote received from ${user.name} for ${data.cardId}`);
     
     try {
       // Insert vote with user_identity
@@ -239,19 +228,13 @@ io.on('connection', (socket) => {
       });
       
       socket.emit('voteSuccess');
-      console.log(`Vote recorded successfully for ${data.cardId}`);
       
     } catch (err) {
-      console.error('Vote error:', err);
       socket.emit('voteError', { message: 'Failed to record vote' });
     }
   });
   
   socket.on('disconnect', () => {
-    const user = activeUsers.get(socket.id);
-    if (user) {
-      console.log(`User disconnected: ${user.name}`);
-    }
     activeUsers.delete(socket.id);
     socket.broadcast.emit('userLeft', socket.id);
   });
@@ -268,9 +251,8 @@ async function loadUserIdentities() {
         solAddress: row.sol_address
       });
     });
-    console.log(`Loaded ${userIdentities.size} user identities`);
   } catch (err) {
-    console.error('Error loading user identities:', err);
+    // Silently handle error
   }
 }
 
@@ -308,5 +290,5 @@ app.get('/api/votes/:cardId', async (req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} with PostgreSQL`);
+  console.log(`Server running on port ${PORT}`);
 });
