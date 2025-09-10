@@ -35,6 +35,7 @@ export default function VoteNotifications({ socket, cards }: VoteNotificationsPr
         }
         setNotifications(prev => [newNotif, ...prev].slice(0, 10))
         
+        // Auto remove after 4 seconds
         setTimeout(() => {
           setNotifications(prev => prev.filter(n => n.id !== newNotif.id))
         }, 4000)
@@ -54,28 +55,60 @@ export default function VoteNotifications({ socket, cards }: VoteNotificationsPr
       top: '20px',
       right: '20px',
       zIndex: 1000,
-      maxWidth: '400px'
+      maxWidth: '400px',
+      pointerEvents: 'none'
     }}>
       {notifications.map((notif, index) => (
         <div
           key={notif.id}
-          className="notification-shake"
+          className="notification-item"
           style={{
-            background: 'linear-gradient(90deg, #00ff88, #00ffff)',
-            color: '#000',
-            padding: '15px 20px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#fff',
+            padding: '12px 20px',
             marginBottom: '10px',
-            borderRadius: '10px',
-            boxShadow: '0 5px 20px rgba(0,255,255,0.5)',
-            fontSize: '18px',
-            fontWeight: 'bold',
+            borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.5)',
+            fontSize: '14px',
+            fontWeight: 600,
             opacity: 1 - (index * 0.1),
-            animation: 'slideIn 0.3s ease-out, shake 0.5s ease-in-out'
+            animation: 'slideIn 0.3s ease-out, shake 0.5s ease-in-out',
+            transform: 'translateX(0)',
+            transition: 'all 0.3s ease',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
         >
-          🔥💸 {notif.voter} voted for {notif.cardName}! 💸🔥
+          <span style={{ fontSize: '18px' }}>🔥</span>
+          <span>{notif.voter} voted for {notif.cardName}!</span>
+          <span style={{ fontSize: '18px' }}>💎</span>
         </div>
       ))}
+      
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10% { transform: translateX(-10px) rotate(-1deg); }
+          20% { transform: translateX(10px) rotate(1deg); }
+          30% { transform: translateX(-10px) rotate(-1deg); }
+          40% { transform: translateX(10px) rotate(1deg); }
+          50% { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   )
 }

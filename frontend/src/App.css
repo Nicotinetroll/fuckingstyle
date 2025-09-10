@@ -28,12 +28,56 @@
   50% { box-shadow: 0 20px 60px rgba(255,215,0,0.9); }
 }
 
+@keyframes voteShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-3px) rotate(-0.5deg); }
+  20% { transform: translateX(3px) rotate(0.5deg); }
+  30% { transform: translateX(-3px) rotate(-0.5deg); }
+  40% { transform: translateX(3px) rotate(0.5deg); }
+  50% { transform: translateX(0) rotate(0deg) scale(1.02); }
+  60% { transform: translateX(0) rotate(0deg) scale(1); }
+}
+
+@keyframes slideShine {
+  0% { 
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+@keyframes fireGlow {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fireFlicker {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Ensure html and body can scroll */
 html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  /* Allow vertical scrolling */
   overflow-y: auto !important;
   height: auto !important;
   min-height: 100vh;

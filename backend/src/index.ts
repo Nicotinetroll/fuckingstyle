@@ -26,24 +26,15 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const activeUsers = new Map();
-const usedNames = new Set();
+const userIdentities = new Map(); // userId -> {name, color, solAddress}
 
-// Funny name generator
+// Funny name generator arrays (keeping them for brevity)
 const adjectives = [
   'Angry', 'Happy', 'Sleepy', 'Bouncy', 'Grumpy', 'Fluffy', 'Sparkly', 'Dizzy', 'Sneaky', 'Giggly',
   'Wobbly', 'Fuzzy', 'Chunky', 'Sassy', 'Cranky', 'Bubbly', 'Wiggly', 'Quirky', 'Nerdy', 'Silly',
   'Clumsy', 'Mighty', 'Tiny', 'Giant', 'Flying', 'Dancing', 'Singing', 'Jumping', 'Running', 'Sleeping',
   'Confused', 'Excited', 'Brave', 'Shy', 'Wild', 'Calm', 'Crazy', 'Lazy', 'Hyper', 'Chill',
-  'Magical', 'Mystical', 'Epic', 'Legendary', 'Cosmic', 'Galactic', 'Quantum', 'Atomic', 'Electric', 'Turbo',
-  'Super', 'Ultra', 'Mega', 'Giga', 'Nano', 'Micro', 'Alpha', 'Beta', 'Omega', 'Prime',
-  'Spicy', 'Salty', 'Sweet', 'Sour', 'Bitter', 'Tasty', 'Yummy', 'Crispy', 'Juicy', 'Chewy',
-  'Glowing', 'Shiny', 'Sparkly', 'Glittery', 'Radiant', 'Luminous', 'Blazing', 'Frozen', 'Burning', 'Melting',
-  'Ancient', 'Modern', 'Future', 'Retro', 'Vintage', 'Classic', 'Premium', 'Deluxe', 'Basic', 'Advanced',
-  'Sneaky', 'Stealthy', 'Invisible', 'Visible', 'Hidden', 'Secret', 'Mysterious', 'Unknown', 'Famous', 'Forgotten',
-  'Royal', 'Noble', 'Humble', 'Proud', 'Wise', 'Foolish', 'Smart', 'Clever', 'Brilliant', 'Dumb',
-  'Fast', 'Slow', 'Quick', 'Swift', 'Speedy', 'Sluggish', 'Rapid', 'Instant', 'Delayed', 'Laggy',
-  'Loud', 'Quiet', 'Silent', 'Noisy', 'Screaming', 'Whispering', 'Shouting', 'Mumbling', 'Singing', 'Humming',
-  'Smooth', 'Rough', 'Soft', 'Hard', 'Squishy', 'Solid', 'Liquid', 'Gaseous', 'Plasma', 'Ethereal'
+  'Magical', 'Mystical', 'Epic', 'Legendary', 'Cosmic', 'Galactic', 'Quantum', 'Atomic', 'Electric', 'Turbo'
 ];
 
 const nouns = [
@@ -52,76 +43,119 @@ const nouns = [
   'Ninja', 'Pirate', 'Viking', 'Knight', 'Samurai', 'Wizard', 'Witch', 'Mage', 'Warrior', 'Archer',
   'Potato', 'Banana', 'Apple', 'Orange', 'Mango', 'Avocado', 'Tomato', 'Carrot', 'Broccoli', 'Pizza',
   'Taco', 'Burger', 'Sushi', 'Noodle', 'Cookie', 'Donut', 'Cake', 'Pie', 'Waffle', 'Pancake',
-  'Robot', 'Cyborg', 'Android', 'Machine', 'Computer', 'Laptop', 'Phone', 'Tablet', 'Console', 'Gadget',
-  'Rocket', 'Spaceship', 'Satellite', 'Asteroid', 'Comet', 'Planet', 'Star', 'Galaxy', 'Universe', 'Cosmos',
-  'Ghost', 'Spirit', 'Phantom', 'Specter', 'Wraith', 'Demon', 'Angel', 'Deity', 'Monster', 'Beast',
-  'Penguin', 'Dolphin', 'Whale', 'Shark', 'Octopus', 'Squid', 'Jellyfish', 'Seahorse', 'Turtle', 'Crab',
-  'Eagle', 'Hawk', 'Owl', 'Parrot', 'Peacock', 'Flamingo', 'Penguin', 'Ostrich', 'Duck', 'Goose',
-  'Butterfly', 'Bee', 'Ant', 'Spider', 'Scorpion', 'Beetle', 'Firefly', 'Dragonfly', 'Mosquito', 'Fly',
-  'Tree', 'Flower', 'Cactus', 'Mushroom', 'Bush', 'Grass', 'Vine', 'Leaf', 'Root', 'Seed',
-  'Mountain', 'Valley', 'River', 'Ocean', 'Lake', 'Desert', 'Forest', 'Jungle', 'Island', 'Cave',
-  'Thunder', 'Lightning', 'Storm', 'Rainbow', 'Cloud', 'Sun', 'Moon', 'Star', 'Eclipse', 'Aurora',
-  'Zombie', 'Vampire', 'Werewolf', 'Mummy', 'Skeleton', 'Goblin', 'Orc', 'Elf', 'Dwarf', 'Fairy',
-  'King', 'Queen', 'Prince', 'Princess', 'Duke', 'Baron', 'Lord', 'Lady', 'Jester', 'Peasant',
-  'Hammer', 'Sword', 'Shield', 'Bow', 'Arrow', 'Spear', 'Axe', 'Dagger', 'Staff', 'Wand',
-  'Book', 'Scroll', 'Map', 'Compass', 'Clock', 'Mirror', 'Crystal', 'Gem', 'Diamond', 'Pearl',
-  'Cheese', 'Bread', 'Egg', 'Milk', 'Butter', 'Yogurt', 'Cream', 'Sugar', 'Salt', 'Pepper'
+  'Robot', 'Cyborg', 'Android', 'Machine', 'Computer', 'Laptop', 'Phone', 'Tablet', 'Console', 'Gadget'
 ];
 
 function generateUniqueName(): string {
-  let name = '';
-  let attempts = 0;
-  
-  do {
-    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    name = `${adj} ${noun}`;
-    attempts++;
-    
-    // Add number if we've tried too many times (to handle when we have many users)
-    if (attempts > 50) {
-      name = `${adj} ${noun} ${Math.floor(Math.random() * 999)}`;
-    }
-  } while (usedNames.has(name) && attempts < 100);
-  
-  usedNames.add(name);
-  return name;
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${adj} ${noun}`;
 }
 
-pool.query(`
-  CREATE TABLE IF NOT EXISTS votes (
-    id SERIAL PRIMARY KEY,
-    card_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW()
-  )
-`).catch(console.error);
+function generateUserId(): string {
+  return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Initialize database tables
+async function initDatabase() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS votes (
+        id SERIAL PRIMARY KEY,
+        card_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255),
+        user_identity VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_identities (
+        user_id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        color VARCHAR(7) NOT NULL,
+        sol_address VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    console.log('Database tables initialized');
+  } catch (err) {
+    console.error('Database initialization error:', err);
+  }
+}
+
+initDatabase();
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   
-  const userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-  const userName = generateUniqueName();
-  
-  activeUsers.set(socket.id, { 
-    id: socket.id, 
-    name: userName, 
-    color: userColor,
-    x: 50, // Start at center (50%)
-    y: 50, // Start at center (50%)
-    message: '',
-    isTyping: false
+  // Wait for user identity from client
+  socket.on('identify', async (data) => {
+    let userId = data.userId;
+    let userName, userColor, solAddress;
+    
+    if (userId && userIdentities.has(userId)) {
+      // Existing user
+      const identity = userIdentities.get(userId);
+      userName = identity.name;
+      userColor = identity.color;
+      solAddress = identity.solAddress;
+      console.log(`Returning user: ${userName} (${userId})`);
+    } else {
+      // New user - generate identity
+      userId = generateUserId();
+      userName = generateUniqueName();
+      userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+      solAddress = data.solAddress || null;
+      
+      // Store in memory
+      userIdentities.set(userId, {
+        name: userName,
+        color: userColor,
+        solAddress: solAddress
+      });
+      
+      // Store in database
+      try {
+        await pool.query(
+          'INSERT INTO user_identities (user_id, name, color, sol_address) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING',
+          [userId, userName, userColor, solAddress]
+        );
+      } catch (err) {
+        console.error('Error storing user identity:', err);
+      }
+      
+      console.log(`New user created: ${userName} (${userId})`);
+    }
+    
+    activeUsers.set(socket.id, { 
+      id: socket.id,
+      userId: userId,
+      name: userName, 
+      color: userColor,
+      x: 50,
+      y: 50,
+      message: '',
+      isTyping: false,
+      solAddress: solAddress
+    });
+    
+    // Send identity back to client
+    socket.emit('identity', {
+      userId: userId,
+      name: userName,
+      color: userColor,
+      solAddress: solAddress
+    });
+    
+    socket.emit('users', Array.from(activeUsers.values()));
+    socket.broadcast.emit('userJoined', activeUsers.get(socket.id));
   });
-  
-  console.log(`New user joined: ${userName}`);
-  
-  socket.emit('users', Array.from(activeUsers.values()));
-  socket.broadcast.emit('userJoined', activeUsers.get(socket.id));
   
   socket.on('cursorMove', (data) => {
     const user = activeUsers.get(socket.id);
     if (user && typeof data.x === 'number' && typeof data.y === 'number') {
-      // Store as percentages (0-100)
       user.x = Math.max(0, Math.min(100, data.x));
       user.y = Math.max(0, Math.min(100, data.y));
       
@@ -151,24 +185,65 @@ io.on('connection', (socket) => {
     }
   });
   
+  socket.on('updateSolAddress', async (data) => {
+    const user = activeUsers.get(socket.id);
+    if (user && data.address) {
+      user.solAddress = data.address;
+      
+      // Update in memory
+      if (userIdentities.has(user.userId)) {
+        userIdentities.get(user.userId).solAddress = data.address;
+      }
+      
+      // Update in database
+      try {
+        await pool.query(
+          'UPDATE user_identities SET sol_address = $1 WHERE user_id = $2',
+          [data.address, user.userId]
+        );
+        socket.emit('solAddressUpdated', { success: true });
+      } catch (err) {
+        console.error('Error updating SOL address:', err);
+        socket.emit('solAddressUpdated', { success: false });
+      }
+    }
+  });
+  
   socket.on('vote', async (data) => {
-    console.log('Vote received:', data);
+    const user = activeUsers.get(socket.id);
+    if (!user) {
+      console.log('Vote rejected - user not found');
+      return;
+    }
+    
+    console.log(`Vote received from ${user.name} for ${data.cardId}`);
+    
     try {
+      // Insert vote with user_identity
       await pool.query(
-        'INSERT INTO votes (card_id, user_id) VALUES ($1, $2)',
-        [data.cardId, socket.id]
+        'INSERT INTO votes (card_id, user_id, user_identity) VALUES ($1, $2, $3)',
+        [data.cardId, socket.id, user.userId]
       );
+      
+      // Get updated count
       const result = await pool.query(
         'SELECT COUNT(*) as count FROM votes WHERE card_id = $1',
         [data.cardId]
       );
+      
+      // Broadcast to all clients
       io.emit('voteUpdate', { 
         cardId: data.cardId, 
         count: parseInt(result.rows[0].count),
-        voter: activeUsers.get(socket.id)?.name
+        voter: user.name
       });
+      
+      socket.emit('voteSuccess');
+      console.log(`Vote recorded successfully for ${data.cardId}`);
+      
     } catch (err) {
       console.error('Vote error:', err);
+      socket.emit('voteError', { message: 'Failed to record vote' });
     }
   });
   
@@ -176,12 +251,30 @@ io.on('connection', (socket) => {
     const user = activeUsers.get(socket.id);
     if (user) {
       console.log(`User disconnected: ${user.name}`);
-      usedNames.delete(user.name); // Free up the name for reuse
     }
     activeUsers.delete(socket.id);
     socket.broadcast.emit('userLeft', socket.id);
   });
 });
+
+// Load existing user identities on startup
+async function loadUserIdentities() {
+  try {
+    const result = await pool.query('SELECT * FROM user_identities');
+    result.rows.forEach(row => {
+      userIdentities.set(row.user_id, {
+        name: row.name,
+        color: row.color,
+        solAddress: row.sol_address
+      });
+    });
+    console.log(`Loaded ${userIdentities.size} user identities`);
+  } catch (err) {
+    console.error('Error loading user identities:', err);
+  }
+}
+
+loadUserIdentities();
 
 app.get('/api/health', async (req, res) => {
   try {
@@ -190,6 +283,7 @@ app.get('/api/health', async (req, res) => {
       status: 'OK',
       database: 'PostgreSQL connected',
       activeUsers: activeUsers.size,
+      totalUsers: userIdentities.size,
       timestamp: new Date().toISOString()
     });
   } catch (err) {

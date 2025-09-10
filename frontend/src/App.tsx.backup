@@ -5,7 +5,6 @@ import MultiplayerCursors from './components/MultiplayerCursors'
 import VoteNotifications from './components/VoteNotifications'
 import AnimatedCounter from './components/AnimatedCounter'
 import FloatingNav from './components/FloatingNav'
-import UserInfoPanel from './components/UserInfoPanel'
 import './App.css'
 
 const socket = io('/', {
@@ -29,12 +28,8 @@ function App() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [votedCard, setVotedCard] = useState<string | null>(null)
-  const [, setUserId] = useState<string | null>(null)
-  const [userName, setUserName] = useState<string>('')
-  const [userColor, setUserColor] = useState<string>('#000000')
-  const [votedCards, setVotedCards] = useState<string[]>([])
   
-  // All cards data
+  // All cards data - 13 total (3 top + 10 bottom for 2 rows of 5)
   const allCards: Card[] = [
     {
       id: 'candidate1',
@@ -142,42 +137,6 @@ function App() {
     }
   ]
   
-  // Load user identity from localStorage
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId')
-    const storedVotedCards = localStorage.getItem('votedCards')
-    
-    if (storedVotedCards) {
-      setVotedCards(JSON.parse(storedVotedCards))
-    }
-    
-    // Send identity to server
-    socket.emit('identify', { 
-      userId: storedUserId,
-      solAddress: localStorage.getItem('userSolAddress')
-    })
-    
-    // Listen for identity response
-    socket.on('identity', (data: { userId: string, name: string, color: string, solAddress?: string }) => {
-      setUserId(data.userId)
-      setUserName(data.name)
-      setUserColor(data.color)
-      
-      // Store in localStorage
-      localStorage.setItem('userId', data.userId)
-      localStorage.setItem('userName', data.name)
-      localStorage.setItem('userColor', data.color)
-      
-      if (data.solAddress) {
-        localStorage.setItem('userSolAddress', data.solAddress)
-      }
-    })
-    
-    return () => {
-      socket.off('identity')
-    }
-  }, [])
-  
   // Sort cards by votes
   const sortedCards = useMemo(() => {
     return [...allCards].sort((a, b) => {
@@ -185,7 +144,7 @@ function App() {
       const votesB = votes[b.id] || 0
       return votesB - votesA
     })
-  }, [votes])
+  }, [votes, allCards])
   
   // Split into top 3 and bottom 10
   const topCards = sortedCards.slice(0, 3)
@@ -222,33 +181,12 @@ function App() {
   }, [])
 
   const handleVote = (cardId: string) => {
-    console.log('Vote button clicked for:', cardId)
-    console.log('Current voted cards:', votedCards)
-    console.log('Socket connected:', socket.connected)
-    
-    // Check vote limit (allow multiple votes for same candidate)
-    if (votedCards.length >= 10) {
-      alert('You have used all 10 votes!')
-      return
-    }
-    
-    // Update local state (allow duplicates)
-    const newVotedCards = [...votedCards, cardId]
-    setVotedCards(newVotedCards)
-    localStorage.setItem('votedCards', JSON.stringify(newVotedCards))
-    console.log('New voted cards:', newVotedCards)
-    
-    // Send vote to server
     socket.emit('vote', { cardId })
-    console.log('Vote emitted to server')
-    
-    // Visual feedback
     setSelectedCard(cardId)
     setTimeout(() => setSelectedCard(null), 600)
   }
 
   const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0)
-  const votesRemaining = 10 - votedCards.length
 
   // Render large card for top 3
   const renderTopCard = (card: Card, index: number) => {
@@ -256,8 +194,6 @@ function App() {
     const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100) : 0
     const isHovered = hoveredCard === card.id
     const isSelected = selectedCard === card.id
-    const votesForThisCard = votedCards.filter(id => id === card.id).length
-    const hasVoted = votesForThisCard > 0
     const isFirst = index === 0
     const isSecond = index === 1
     const isThird = index === 2
@@ -375,7 +311,7 @@ function App() {
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           transform: isSelected ? 'scale(0.98)' : 'scale(1)'
         }}>
-          {/* Rank Badge */}
+          {/* Rank Badge - Properly Centered */}
           <div style={{
             position: 'absolute',
             top: '-16px',
@@ -411,26 +347,6 @@ function App() {
               {index === 0 ? '1ST PLACE' : index === 1 ? '2ND PLACE' : '3RD PLACE'}
             </motion.div>
           </div>
-          
-          {/* Already Voted Badge */}
-          {hasVoted && (
-            <div style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              background: 'linear-gradient(135deg, #34C759, #30D158)',
-              color: '#fff',
-              padding: '6px 12px',
-              borderRadius: '100px',
-              fontSize: '11px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              boxShadow: '0 2px 8px rgba(52, 199, 89, 0.4)'
-            }}>
-              ✓ {votesForThisCard}x
-            </div>
-          )}
           
           {/* Profile Section */}
           <div style={{ textAlign: 'center' }}>
@@ -504,18 +420,15 @@ function App() {
               </div>
             </div>
             
-            {/* Vote Button */}
+            {/* Vote Button with thematic colors */}
             <motion.button
-              whileHover={{ scale: votesRemaining > 0 ? 1.05 : 1 }}
-              whileTap={{ scale: votesRemaining > 0 ? 0.95 : 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleVote(card.id)}
-              disabled={votesRemaining === 0}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: votesRemaining === 0
-                  ? 'rgba(255, 59, 48, 0.15)'
-                  : isHovered 
+                background: isHovered 
                   ? isFirst
                     ? 'linear-gradient(135deg, #FFD700, #FF6B35)'
                     : isSecond
@@ -530,9 +443,7 @@ function App() {
                     : isThird
                     ? 'rgba(205, 127, 50, 0.15)'
                     : 'rgba(255, 255, 255, 0.1)',
-                border: votesRemaining === 0
-                  ? '1px solid rgba(255, 59, 48, 0.3)'
-                  : isFirst
+                border: isFirst
                   ? '1px solid rgba(255, 215, 0, 0.4)'
                   : isSecond
                   ? '1px solid rgba(192, 192, 192, 0.4)'
@@ -540,13 +451,13 @@ function App() {
                   ? '1px solid rgba(205, 127, 50, 0.4)'
                   : '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '16px',
-                color: votesRemaining === 0 ? 'rgba(255, 255, 255, 0.4)' : '#fff',
+                color: '#fff',
                 fontSize: '16px',
                 fontWeight: 600,
                 letterSpacing: '-0.01em',
-                cursor: votesRemaining === 0 ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: isHovered && votesRemaining > 0
+                boxShadow: isHovered 
                   ? '0 8px 24px rgba(0, 0, 0, 0.4)'
                   : isFirst
                   ? '0 2px 8px rgba(255, 215, 0, 0.2)'
@@ -557,11 +468,10 @@ function App() {
                   : '0 2px 8px rgba(255, 255, 255, 0.1)',
                 textShadow: isFirst || isSecond || isThird
                   ? '0 1px 3px rgba(0,0,0,0.4)'
-                  : '0 1px 2px rgba(0,0,0,0.3)',
-                opacity: votesRemaining === 0 ? 0.5 : 1
+                  : '0 1px 2px rgba(0,0,0,0.3)'
               }}
             >
-              {hasVoted ? `Voted (${votesForThisCard}x)` : votesRemaining === 0 ? 'No Votes Left' : 'Vote Now'}
+              Vote Now
             </motion.button>
           </div>
         </div>
@@ -575,8 +485,6 @@ function App() {
     const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100) : 0
     const isHovered = hoveredCard === card.id
     const isSelected = selectedCard === card.id
-    const votesForThisCard = votedCards.filter(id => id === card.id).length
-    const hasVoted = votesForThisCard > 0
     const rank = index + 4 // Since these are positions 4-13
     
     return (
@@ -652,26 +560,6 @@ function App() {
           }}>
             #{rank}
           </div>
-          
-          {/* Already Voted indicator */}
-          {hasVoted && (
-            <div style={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              background: 'rgba(52, 199, 89, 0.2)',
-              width: '20px',
-              height: '20px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              color: '#34C759'
-            }}>
-              {votesForThisCard}
-            </div>
-          )}
           
           {/* Horizontal layout */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -750,31 +638,25 @@ function App() {
             
             {/* Compact Vote Button */}
             <motion.button
-              whileHover={{ scale: votesRemaining > 0 ? 1.05 : 1 }}
-              whileTap={{ scale: votesRemaining > 0 ? 0.95 : 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleVote(card.id)}
-              disabled={votesRemaining === 0}
               style={{
                 padding: '6px 16px',
-                background: votesRemaining === 0
-                  ? 'rgba(255, 59, 48, 0.15)'
-                  : isHovered 
+                background: isHovered 
                   ? 'rgba(255, 255, 255, 0.2)'
                   : 'rgba(255, 255, 255, 0.1)',
-                border: votesRemaining === 0
-                  ? '1px solid rgba(255, 59, 48, 0.3)'
-                  : '1px solid rgba(255, 255, 255, 0.3)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '8px',
-                color: votesRemaining === 0 ? 'rgba(255, 255, 255, 0.4)' : '#fff',
+                color: '#fff',
                 fontSize: '12px',
                 fontWeight: 600,
-                cursor: votesRemaining === 0 ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                opacity: votesRemaining === 0 ? 0.5 : 1
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
               }}
             >
-              {hasVoted ? `Voted (${votesForThisCard}x)` : votesRemaining === 0 ? 'No Votes' : 'Vote'}
+              Vote
             </motion.button>
           </div>
         </div>
@@ -826,7 +708,6 @@ function App() {
         <MultiplayerCursors socket={socket} onUsersUpdate={setActiveUsers} />
         <FloatingNav activeUsers={activeUsers} connected={connected} />
         <VoteNotifications socket={socket} cards={allCards} />
-        {userName && <UserInfoPanel socket={socket} userName={userName} userColor={userColor} />}
 
         {/* Header */}
         <motion.div
@@ -860,7 +741,7 @@ function App() {
             fontWeight: 400,
             letterSpacing: '-0.01em'
           }}>
-            Vote for your champion • {votesRemaining} votes left
+            Vote for your champion
           </p>
         </motion.div>
 
@@ -952,16 +833,19 @@ function App() {
         }
         
         @media (max-width: 1200px) {
+          /* Switch to 3 columns for tablets */
           div[style*="gridTemplateColumns: 'repeat(5, 1fr)'"] {
             grid-template-columns: repeat(3, 1fr) !important;
           }
         }
         
         @media (max-width: 768px) {
+          /* Switch to 2 columns for mobile */
           div[style*="gridTemplateColumns: 'repeat(5, 1fr)'"] {
             grid-template-columns: repeat(2, 1fr) !important;
           }
           
+          /* Stack top cards vertically on mobile */
           div[style*="gridTemplateColumns: 'repeat(3, 1fr)'"] {
             grid-template-columns: 1fr !important;
           }
