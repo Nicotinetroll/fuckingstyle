@@ -20,6 +20,8 @@ interface Card {
   image: string
   color: string
   gradient: string
+  scammerProfit?: string
+  investorLoss?: string
 }
 
 function App() {
@@ -37,108 +39,134 @@ function App() {
   // All cards data
   const allCards: Card[] = [
     {
-      id: 'candidate1',
-      name: 'Patrik Jakubčo',
-      role: 'Innovation Leader',
-      image: 'https://ca.slack-edge.com/T056AS13329-U08LHKZLW13-5e63546372d4-192',
+      id: 'hawk',
+      name: 'HAWK Tuah',
+      role: '2024 - Haliey Welch Disaster',
+      image: 'https://i.imgur.com/TJQXSpO.png',
+      color: '#EC4899',
+      gradient: 'linear-gradient(135deg, #EC4899, #BE185D)',
+      scammerProfit: '$2.8M',
+      investorLoss: '$151M'
+    },
+    {
+      id: 'wlfi',
+      name: 'WLFI Trump',
+      role: '2024 - Trump Family DeFi',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/33132.png',
+      color: '#DC2626',
+      gradient: 'linear-gradient(135deg, #DC2626, #991B1B)',
+      scammerProfit: '$300M+',
+      investorLoss: 'TBD'
+    },
+    {
+      id: 'luna',
+      name: 'LUNA / Terra',
+      role: '2022 - Do Kwon Masterclass',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/4172.png',
+      color: '#FFD93D',
+      gradient: 'linear-gradient(135deg, #FFD93D, #FF6B6B)',
+      scammerProfit: '$80M+',
+      investorLoss: '$60B'
+    },
+    {
+      id: 'ftx',
+      name: 'FTT / FTX',
+      role: '2022 - SBF Prison Speedrun',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/4195.png',
+      color: '#5FCFFF',
+      gradient: 'linear-gradient(135deg, #5FCFFF, #3B82F6)',
+      scammerProfit: '$8B+',
+      investorLoss: '$8B'
+    },
+    {
+      id: 'andrewt',
+      name: 'DADDY Tate',
+      role: '2024 - Andrew Tate Pump',
+      image: 'https://i.imgur.com/8YK6NXH.png',
+      color: '#8B5CF6',
+      gradient: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+      scammerProfit: '$10M+',
+      investorLoss: '$45M'
+    },
+    {
+      id: 'iggy',
+      name: 'MOTHER Iggy',
+      role: '2024 - Iggy Azalea Coin',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/30870.png',
+      color: '#F472B6',
+      gradient: 'linear-gradient(135deg, #F472B6, #DB2777)',
+      scammerProfit: '$5M+',
+      investorLoss: '$25M'
+    },
+    {
+      id: 'squid',
+      name: 'Squid Game',
+      role: '2021 - Netflix Rugpull',
+      image: 'https://i.imgur.com/JLvN3wF.png',
       color: '#FF6B6B',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      gradient: 'linear-gradient(135deg, #FF006E, #8338EC)',
+      scammerProfit: '$3.36M',
+      investorLoss: '$3.36M'
     },
     {
-      id: 'candidate2', 
-      name: 'Palo Habera',
-      role: 'Creative Director',
-      image: 'https://upload.wikimedia.org/wikipedia/commons/d/db/PavolHaberaKraus.jpg',
-      color: '#4ECDC4',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      id: 'celsius',
+      name: 'CEL / Celsius',
+      role: '2022 - Mashinsky Bank',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/10052.png',
+      color: '#FF8C42',
+      gradient: 'linear-gradient(135deg, #FF8C42, #FF3C38)',
+      scammerProfit: '$50M+',
+      investorLoss: '$4.7B'
     },
     {
-      id: 'candidate3',
-      name: 'Vašo Patejdl',
-      role: 'Strategy Expert',
-      image: 'https://i.scdn.co/image/ab67616100005174474b21aac8ad28d40be779f9',
-      color: '#95E1D3',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+      id: 'safemoon',
+      name: 'SafeMoon',
+      role: '2021 - Safely to Zero',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/8757.png',
+      color: '#00E4B3',
+      gradient: 'linear-gradient(135deg, #00E4B3, #0B7A75)',
+      scammerProfit: '$200M+',
+      investorLoss: '$8.9B'
     },
     {
-      id: 'candidate4',
-      name: 'Richard Müller',
-      role: 'Technical Architect',
-      image: 'https://www.aktuality.sk/thumbnail/660x/richard-muller.jpg',
-      color: '#FFA07A',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+      id: 'bitconnect',
+      name: 'BitConnect',
+      role: '2018 - WASU WASU WASUUUP',
+      image: 'https://i.imgur.com/RdhwVOn.png',
+      color: '#F59E0B',
+      gradient: 'linear-gradient(135deg, #F59E0B, #DC2626)',
+      scammerProfit: '$2.4B',
+      investorLoss: '$3.5B'
     },
     {
-      id: 'candidate5',
-      name: 'Marika Gombitová',
-      role: 'Product Manager',
-      image: 'https://www.teraz.sk/img/5b/5b1ee7e4-bcf3-4e7a-beb4-fab5f7bc9e35_660x.jpg',
-      color: '#98D8C8',
-      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+      id: 'cryptozoo',
+      name: 'CryptoZoo',
+      role: '2021 - Logan Paul Zoo',
+      image: 'https://i.imgur.com/VuVn6HB.png',
+      color: '#8B5CF6',
+      gradient: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+      scammerProfit: '$3M+',
+      investorLoss: '$3M'
     },
     {
-      id: 'candidate6',
-      name: 'Miroslav Žbirka',
-      role: 'Design Lead',
-      image: 'https://t.aimg.sk/magaziny/K5G1B7YFQY2x7kVekQ_3WA~Meky.jpg?t=L2ZpdC1pbi82NDB4MA%3D%3D&h=sEqIkfRqcvRc7S9RqiCgVQ&e=2145916800&v=1',
-      color: '#FFB6C1',
-      gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+      id: 'savethechildren',
+      name: 'Save The Kids',
+      role: '2021 - FaZe Clan Special',
+      image: 'https://i.imgur.com/bH9EBmS.png',
+      color: '#06B6D4',
+      gradient: 'linear-gradient(135deg, #06B6D4, #0891B2)',
+      scammerProfit: '$1.5M',
+      investorLoss: '$1.5M'
     },
     {
-      id: 'candidate7',
-      name: 'Peter Nagy',
-      role: 'Marketing Director',
-      image: 'https://www.cas.sk/wp-content/uploads/2021/03/peter-nagy-cas.sk_.jpg',
-      color: '#DDA0DD',
-      gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)'
-    },
-    {
-      id: 'candidate8',
-      name: 'Jaro Filip',
-      role: 'Operations Manager',
-      image: 'https://www.feminity.zoznam.sk/wp-content/uploads/2019/11/jaro-filip.jpg',
-      color: '#F0E68C',
-      gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)'
-    },
-    {
-      id: 'candidate9',
-      name: 'Robo Grigorov',
-      role: 'Business Analyst',
-      image: 'https://www.expres.sk/wp-content/uploads/2020/01/grigorov-e1578492815329.jpg',
-      color: '#87CEEB',
-      gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
-    },
-    {
-      id: 'candidate10',
-      name: 'Boris Kollár',
-      role: 'Security Expert',
-      image: 'https://www.aktuality.sk/foto/605911/605911_660x.jpg',
-      color: '#9370DB',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #FF6B6B 100%)'
-    },
-    {
-      id: 'candidate11',
-      name: 'Milan Lasica',
-      role: 'Content Strategist',
-      image: 'https://cdn.webnoviny.sk/sites/32/2021/07/milan-lasica.jpg',
-      color: '#20B2AA',
-      gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)'
-    },
-    {
-      id: 'candidate12',
-      name: 'Jožo Ráž',
-      role: 'Data Scientist',
-      image: 'https://www.zpiestan.sk/wp-content/uploads/jozo-raz-3.jpg',
-      color: '#FF69B4',
-      gradient: 'linear-gradient(135deg, #f43b47 0%, #453a94 100%)'
-    },
-    {
-      id: 'candidate13',
-      name: 'Dara Rolins',
-      role: 'Brand Manager',
-      image: 'https://www.blesk.cz/img/1/normal1200/6731729_.jpg',
-      color: '#FF1493',
-      gradient: 'linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 50%, #2BFF88 100%)'
+      id: 'milady',
+      name: 'LADYS Milady',
+      role: '2023 - Milady Meme Coin',
+      image: 'https://s2.coinmarketcap.com/static/img/coins/200x200/25727.png',
+      color: '#A855F7',
+      gradient: 'linear-gradient(135deg, #A855F7, #7C3AED)',
+      scammerProfit: '$8M+',
+      investorLoss: '$40M'
     }
   ]
   
@@ -845,7 +873,7 @@ function App() {
             letterSpacing: '-0.02em',
             lineHeight: 1
           }}>
-            Hall of Fame
+            Rugpull Hall of Fame
           </h1>
           <p style={{
             fontSize: '24px',
@@ -854,7 +882,7 @@ function App() {
             fontWeight: 400,
             letterSpacing: '-0.01em'
           }}>
-            Vote for your champion • {votesRemaining} votes left
+            Vote for the most legendary crypto scam • {votesRemaining} votes left
           </p>
         </motion.div>
 
@@ -899,10 +927,263 @@ function App() {
           >
             {bottomCards.map((card, index) => renderCompactCard(card, index))}
           </motion.div>
-        </AnimatePresence>
-      </div>
+        
 
-      {/* Add animations */}
+        {/* REWARDS SECTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            width: '100%',
+            maxWidth: '1200px',
+            marginTop: '80px',
+            marginBottom: '100px'
+          }}
+        >
+          {/* Section Header */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '60px'
+          }}>
+            <h2 style={{
+              fontSize: '48px',
+              fontWeight: 600,
+              color: '#fff',
+              margin: 0,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2
+            }}>
+              Community Rewards
+            </h2>
+            <p style={{
+              fontSize: '18px',
+              color: 'rgba(255, 255, 255, 0.5)',
+              marginTop: '16px',
+              maxWidth: '600px',
+              margin: '16px auto 0',
+              lineHeight: 1.5
+            }}>
+              Vote for history's most legendary crypto disasters and earn rewards.
+              Because if we can't beat them, let's at least rank them properly.
+            </p>
+          </div>
+
+          {/* Requirements Box */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '20px',
+            padding: '40px',
+            marginBottom: '60px',
+            backdropFilter: 'blur(40px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(150%)'
+          }}>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.9)',
+              marginBottom: '32px',
+              textAlign: 'center'
+            }}>
+              How to Qualify
+            </h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '24px'
+            }}>
+              <div style={{
+                textAlign: 'center',
+                padding: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.06)'
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  marginBottom: '12px'
+                }}>💎</div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  marginBottom: '8px'
+                }}>Hold Tokens</div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  Join the community
+                </div>
+              </div>
+              
+              <div style={{
+                textAlign: 'center',
+                padding: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.06)'
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  marginBottom: '12px'
+                }}>🗳️</div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  marginBottom: '8px'
+                }}>Vote</div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  Use your 10 votes
+                </div>
+              </div>
+              
+              <div style={{
+                textAlign: 'center',
+                padding: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.06)'
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  marginBottom: '12px'
+                }}>👛</div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  marginBottom: '8px'
+                }}>Add Wallet</div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  SOL address for rewards
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Milestones */}
+          <div style={{
+            marginTop: '60px'
+          }}>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.9)',
+              marginBottom: '40px',
+              textAlign: 'center'
+            }}>
+              Reward Milestones
+            </h3>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px'
+            }}>
+              {[
+                {
+                  mc: '50K MC',
+                  reward: '10% Dev Wallet',
+                  winners: '3 lucky voters',
+                  color: '#34C759'
+                },
+                {
+                  mc: '100K MC',
+                  reward: '15% Dev Wallet',
+                  winners: '5 lucky voters',
+                  color: '#5AC8FA'
+                },
+                {
+                  mc: '250K MC',
+                  reward: '20% Dev Wallet',
+                  winners: '10 lucky voters',
+                  color: '#AF52DE'
+                },
+                {
+                  mc: '500K MC',
+                  reward: '30% Dev Wallet',
+                  winners: '20 lucky voters',
+                  color: '#FFD700'
+                }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '3px',
+                    background: item.color + '30'
+                  }} />
+                  
+                  <div style={{
+                    fontSize: '28px',
+                    fontWeight: 700,
+                    color: item.color,
+                    marginBottom: '8px'
+                  }}>
+                    {item.mc}
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    marginBottom: '4px'
+                  }}>
+                    {item.reward}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    color: 'rgba(255, 255, 255, 0.5)'
+                  }}>
+                    {item.winners}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div style={{
+            textAlign: 'center',
+            marginTop: '60px',
+            padding: '24px',
+            background: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.06)'
+          }}>
+            <div style={{
+              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.6)',
+              lineHeight: 1.6
+            }}>
+              This is a community project documenting crypto history's biggest failures.<br/>
+              Not financial advice. DYOR. We're just here to rank the rugpulls.
+            </div>
+          </div>
+        </motion.div>
+        
+        
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 0.8; }
