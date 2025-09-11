@@ -1,42 +1,24 @@
 import { motion } from 'framer-motion'
 import TokenInfo from './TokenInfo'
 import WinnersSection from './WinnersSection'
+import CONFIG from '../config'
 
 interface RewardsSectionProps {
   isMobile?: boolean
 }
 
 export default function RewardsSection({ isMobile = false }: RewardsSectionProps) {
-  const milestones = [
-    {
-      mc: '50K MC',
-      reward: '10% Dev Wallet',
-      winners: '3 lucky voters',
-      color: '#34C759',
-      bg: 'rgba(52, 199, 89, 0.1)'
-    },
-    {
-      mc: '100K MC',
-      reward: '15% Dev Wallet',
-      winners: '5 lucky voters',
-      color: '#5AC8FA',
-      bg: 'rgba(90, 200, 250, 0.1)'
-    },
-    {
-      mc: '250K MC',
-      reward: '20% Dev Wallet',
-      winners: '10 lucky voters',
-      color: '#AF52DE',
-      bg: 'rgba(175, 82, 222, 0.1)'
-    },
-    {
-      mc: '500K MC',
-      reward: '30% Dev Wallet',
-      winners: '20 lucky voters',
-      color: '#FFD700',
-      bg: 'rgba(255, 215, 0, 0.1)'
+  const milestones = CONFIG.MILESTONES.map((m, i) => {
+    const colors = ['#34C759', '#5AC8FA', '#AF52DE', '#FFD700']
+    const bgs = ['rgba(52, 199, 89, 0.1)', 'rgba(90, 200, 250, 0.1)', 'rgba(175, 82, 222, 0.1)', 'rgba(255, 215, 0, 0.1)']
+    return {
+      mc: m.mc,
+      reward: m.reward,
+      winners: `${m.winners} lucky voters`,
+      color: colors[i],
+      bg: bgs[i]
     }
-  ]
+  })
 
   return (
     <motion.div
@@ -154,7 +136,7 @@ export default function RewardsSection({ isMobile = false }: RewardsSectionProps
               color: 'rgba(255, 255, 255, 0.6)',
               lineHeight: 1.5
             }}>
-              Minimum $50 worth of tokens required
+              Minimum ${CONFIG.MIN_HOLD_AMOUNT} worth of tokens required
             </div>
           </motion.div>
           

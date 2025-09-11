@@ -1,3 +1,5 @@
+import CONFIG from '../config'
+
 interface TokenInfoProps {
   isMobile?: boolean
 }
