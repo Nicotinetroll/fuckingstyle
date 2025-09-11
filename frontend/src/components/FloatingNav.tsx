@@ -307,7 +307,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
               Chart
             </a>
             <a 
-              href="https://t.me/rekdtoken" 
+              href="https://t.me/wegotfuckingrekt" 
               target="_blank"
               rel="noopener noreferrer"
               style={{
