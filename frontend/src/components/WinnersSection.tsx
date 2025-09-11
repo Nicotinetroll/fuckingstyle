@@ -1,20 +1,24 @@
 import { motion } from 'framer-motion'
 
-export default function WinnersSection() {
+interface WinnersSectionProps {
+  isMobile?: boolean
+}
+
+export default function WinnersSection({ isMobile = false }: WinnersSectionProps) {
   return (
     <div id="winners" style={{
-      marginTop: '80px',
-      padding: '60px 40px',
+      marginTop: isMobile ? '60px' : '80px',
+      padding: isMobile ? '40px 20px' : '60px 40px',
       background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.03), rgba(255, 150, 0, 0.01))',
       backdropFilter: 'blur(100px) saturate(180%)',
       WebkitBackdropFilter: 'blur(100px) saturate(180%)',
-      borderRadius: '32px',
+      borderRadius: isMobile ? '24px' : '32px',
       border: '1px solid rgba(255, 215, 0, 0.15)',
       boxShadow: '0 30px 80px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05)'
     }}>
       <div style={{
         textAlign: 'center',
-        marginBottom: '48px'
+        marginBottom: isMobile ? '32px' : '48px'
       }}>
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
@@ -22,7 +26,7 @@ export default function WinnersSection() {
           transition={{ delay: 0.6, type: 'spring' }}
         >
           <h2 style={{
-            fontSize: '48px',
+            fontSize: isMobile ? '32px' : '48px',
             fontWeight: 700,
             background: 'linear-gradient(180deg, #FFD700 0%, #FFA500 100%)',
             WebkitBackgroundClip: 'text',
@@ -37,7 +41,7 @@ export default function WinnersSection() {
           </h2>
         </motion.div>
         <p style={{
-          fontSize: '18px',
+          fontSize: isMobile ? '14px' : '18px',
           color: 'rgba(255, 255, 255, 0.6)',
           lineHeight: 1.5,
           maxWidth: '600px',
@@ -50,8 +54,8 @@ export default function WinnersSection() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '24px',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+        gap: isMobile ? '16px' : '24px',
         marginBottom: '40px'
       }}>
         {['50K MC', '100K MC', '250K MC', '500K MC'].map((milestone, index) => (
@@ -64,8 +68,8 @@ export default function WinnersSection() {
               background: 'rgba(255, 255, 255, 0.04)',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
-              borderRadius: '20px',
-              padding: '24px',
+              borderRadius: isMobile ? '16px' : '20px',
+              padding: isMobile ? '20px' : '24px',
               border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
@@ -73,10 +77,10 @@ export default function WinnersSection() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '20px'
+              marginBottom: isMobile ? '16px' : '20px'
             }}>
               <h3 style={{
-                fontSize: '20px',
+                fontSize: isMobile ? '16px' : '20px',
                 fontWeight: 600,
                 color: '#FFD700',
                 margin: 0
@@ -87,7 +91,7 @@ export default function WinnersSection() {
                 padding: '4px 12px',
                 background: 'rgba(255, 215, 0, 0.15)',
                 borderRadius: '20px',
-                fontSize: '12px',
+                fontSize: isMobile ? '10px' : '12px',
                 fontWeight: 600,
                 color: '#FFD700'
               }}>
@@ -98,7 +102,7 @@ export default function WinnersSection() {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px'
+              gap: isMobile ? '8px' : '12px'
             }}>
               {[1, 2, 3].map((place) => (
                 <div
@@ -106,22 +110,22 @@ export default function WinnersSection() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px',
+                    gap: isMobile ? '8px' : '12px',
+                    padding: isMobile ? '10px' : '12px',
                     background: 'rgba(255, 255, 255, 0.03)',
                     borderRadius: '12px',
                     border: '1px solid rgba(255, 255, 255, 0.06)'
                   }}
                 >
                   <div style={{
-                    width: '24px',
-                    height: '24px',
+                    width: isMobile ? '20px' : '24px',
+                    height: isMobile ? '20px' : '24px',
                     borderRadius: '50%',
                     background: place === 1 ? '#FFD700' : place === 2 ? '#C0C0C0' : '#CD7F32',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '12px',
+                    fontSize: isMobile ? '10px' : '12px',
                     fontWeight: 700,
                     color: '#000'
                   }}>
@@ -129,7 +133,7 @@ export default function WinnersSection() {
                   </div>
                   <div style={{
                     flex: 1,
-                    fontSize: '14px',
+                    fontSize: isMobile ? '12px' : '14px',
                     color: 'rgba(255, 255, 255, 0.4)',
                     fontStyle: 'italic'
                   }}>
@@ -144,19 +148,19 @@ export default function WinnersSection() {
 
       <div style={{
         textAlign: 'center',
-        padding: '24px',
+        padding: isMobile ? '20px' : '24px',
         background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 150, 0, 0.05))',
         borderRadius: '16px',
         border: '1px solid rgba(255, 215, 0, 0.2)'
       }}>
         <div style={{
-          fontSize: '24px',
+          fontSize: isMobile ? '20px' : '24px',
           marginBottom: '8px'
         }}>
           🎯
         </div>
         <div style={{
-          fontSize: '16px',
+          fontSize: isMobile ? '14px' : '16px',
           fontWeight: 600,
           color: '#FFD700',
           marginBottom: '8px'
@@ -164,7 +168,7 @@ export default function WinnersSection() {
           Winners Coming Soon!
         </div>
         <div style={{
-          fontSize: '14px',
+          fontSize: isMobile ? '12px' : '14px',
           color: 'rgba(255, 255, 255, 0.6)'
         }}>
           Vote now to be eligible for upcoming rewards. Winners will be randomly selected from all voters.
@@ -172,4 +176,4 @@ export default function WinnersSection() {
       </div>
     </div>
   )
-}
+}ß
