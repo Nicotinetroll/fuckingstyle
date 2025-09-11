@@ -301,7 +301,7 @@ function App() {
         zIndex: 1
       }}>
         <MultiplayerCursors socket={socket} onUsersUpdate={setActiveUsers} />
-        <FloatingNav activeUsers={activeUsers} connected={connected} tokenCA="Coming Soon" />
+        <FloatingNav activeUsers={activeUsers} connected={connected} tokenCA="DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9" />
         <VoteNotifications socket={socket} cards={allCards} />
         {userName && <UserInfoPanel socket={socket} userName={userName} userColor={userColor} />}
 
