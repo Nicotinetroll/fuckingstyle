@@ -2,7 +2,7 @@
 
 export const CONFIG = {
   // Token Contract Address
-  TOKEN_CA: "DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9", // Change this to your token CA
+  TOKEN_CA: "KOKOT",
   
   // Token Symbol
   TOKEN_SYMBOL: "$FUKD",
@@ -14,13 +14,13 @@ export const CONFIG = {
   CHART_LINK: "https://dexscreener.com/solana/DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9",
   
   // Other Social Links (optional)
-  TWITTER_LINK: "https://twitter.com/fukdtoken", // Optional
+  TWITTER_LINK: "", // Optional
   DISCORD_LINK: "", // Optional
   WEBSITE_LINK: "", // Optional
   
   // Backend Settings
   BACKEND_URL: process.env.NODE_ENV === 'production' 
-    ? 'https://yourdomain.com' 
+    ? 'https://fucking.style' 
     : 'http://localhost:3001',
   
   // Display Settings
@@ -38,9 +38,9 @@ export const CONFIG = {
   // Milestones for rewards
   MILESTONES: [
     { mc: '50K MC', reward: '10% Dev Wallet', winners: 3 },
-    { mc: '100K MC', reward: '15% Dev Wallet', winners: 5 },
-    { mc: '250K MC', reward: '20% Dev Wallet', winners: 10 },
-    { mc: '500K MC', reward: '30% Dev Wallet', winners: 20 }
+    { mc: '100K MC', reward: '15% Dev Wallet', winners: 3 },
+    { mc: '250K MC', reward: '20% Dev Wallet', winners: 3 },
+    { mc: '500K MC', reward: '30% Dev Wallet', winners: 3 }
   ]
 }
 

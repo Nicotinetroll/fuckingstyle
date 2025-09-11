@@ -367,7 +367,7 @@ function App() {
 
       <div style={mobileStyles.content}>
         {!isMobile && <MultiplayerCursors socket={socket} onUsersUpdate={setActiveUsers} />}
-        <FloatingNav activeUsers={activeUsers} connected={connected} tokenCA="DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9" isMobile={isMobile} />
+        <FloatingNav activeUsers={activeUsers} connected={connected} isMobile={isMobile} />
         {!isMobile && <VoteNotifications socket={socket} cards={allCards} />}
         {userName && <UserInfoPanel socket={socket} userName={userName} userColor={userColor} isMobile={isMobile} />}
 
