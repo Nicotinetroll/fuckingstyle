@@ -3,7 +3,7 @@
 
 export const CONFIG = {
   // Token Contract Address
-  TOKEN_CA: "Soon", // Change this to your token CA
+  TOKEN_CA: "FAFAFAFAFAFAKOKT", // Change this to your token CA
   
   // Token Symbol
   TOKEN_SYMBOL: "$FUKD",
