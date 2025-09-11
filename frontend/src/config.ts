@@ -19,10 +19,8 @@ export const CONFIG = {
   DISCORD_LINK: "", // Optional
   WEBSITE_LINK: "", // Optional
   
-  // Backend Settings
-  BACKEND_URL: window.location.hostname === 'localhost' 
-    ? 'http://localhost:3001' 
-    : 'https://fucking.style',
+  // Backend Settings - empty string means use same domain
+  BACKEND_URL: "",
   
   // Display Settings
   SHOW_CHART_BUTTON: true,
@@ -39,9 +37,9 @@ export const CONFIG = {
   // Milestones for rewards
   MILESTONES: [
     { mc: '50K MC', reward: '10% Dev Wallet', winners: 3 },
-    { mc: '100K MC', reward: '15% Dev Wallet', winners: 5 },
-    { mc: '250K MC', reward: '20% Dev Wallet', winners: 10 },
-    { mc: '500K MC', reward: '30% Dev Wallet', winners: 20 }
+    { mc: '100K MC', reward: '15% Dev Wallet', winners: 3 },
+    { mc: '250K MC', reward: '20% Dev Wallet', winners: 3 },
+    { mc: '500K MC', reward: '30% Dev Wallet', winners: 3 }
   ]
 }
 

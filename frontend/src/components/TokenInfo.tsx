@@ -38,7 +38,7 @@ export default function TokenInfo({ isMobile = false }: TokenInfoProps) {
             color: '#fff',
             marginBottom: '12px'
           }}>
-            20% of Total Supply
+            {CONFIG.DEV_WALLET_PERCENTAGE}% of Total Supply
           </div>
           <div style={{
             fontSize: isMobile ? '13px' : '15px',

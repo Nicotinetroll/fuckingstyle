@@ -197,7 +197,7 @@ export default function RewardsSection({ isMobile = false }: RewardsSectionProps
               color: 'rgba(255, 255, 255, 0.6)',
               lineHeight: 1.5
             }}>
-              Use all your 10 votes wisely
+              Use all your {CONFIG.TOTAL_VOTES_PER_USER} votes wisely
             </div>
           </motion.div>
           
