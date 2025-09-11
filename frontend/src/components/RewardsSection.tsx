@@ -143,7 +143,7 @@ export default function RewardsSection() {
               fontWeight: 600,
               color: '#fff',
               marginBottom: '8px'
-            }}>Hold $REKD</div>
+            }}>Hold $FUKD</div>
             <div style={{
               fontSize: '14px',
               color: 'rgba(255, 255, 255, 0.6)',

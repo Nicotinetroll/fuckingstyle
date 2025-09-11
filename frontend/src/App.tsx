@@ -317,26 +317,27 @@ function App() {
           }}
         >
           <h1 style={{
-            fontSize: '72px',
-            fontWeight: 700,
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #999999 100%)',
+            fontSize: 'clamp(36px, 8vw, 72px)',
+            fontWeight: 900,
+            background: 'linear-gradient(180deg, #FF3B30 0%, #FF6B35 50%, #FFD700 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             margin: 0,
-            letterSpacing: '-0.02em',
-            lineHeight: 1
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+            textTransform: 'uppercase'
           }}>
-            Rugpull Hall of Fame
+            We Got Fucking REKD
           </h1>
           <p style={{
-            fontSize: '24px',
+            fontSize: 'clamp(16px, 3vw, 24px)',
             color: 'rgba(255, 255, 255, 0.5)',
             marginTop: '16px',
             fontWeight: 400,
             letterSpacing: '-0.01em'
           }}>
-            Vote for the most legendary crypto scam • {votesRemaining} votes left
+            Vote for the most legendary crypto scams in fucking.style • {votesRemaining} votes left
           </p>
         </motion.div>
 

@@ -51,7 +51,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA }: Floatin
                 💀
               </div>
               <span style={{ fontWeight: 700, fontSize: '18px', color: '#fff', letterSpacing: '-0.5px' }}>
-                $REKD
+                $FUKD
               </span>
             </div>
             <div style={{
