@@ -176,4 +176,4 @@ export default function WinnersSection({ isMobile = false }: WinnersSectionProps
       </div>
     </div>
   )
-}ß
+}
