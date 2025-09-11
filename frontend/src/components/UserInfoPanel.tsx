@@ -5,23 +5,22 @@ interface UserInfoPanelProps {
   socket: Socket
   userName: string
   userColor: string
+  isMobile?: boolean
 }
 
-// Make resetVotes available globally for console access
 declare global {
   interface Window {
     resetVotes?: () => void;
   }
 }
 
-export default function UserInfoPanel({ socket, userName, userColor }: UserInfoPanelProps) {
+export default function UserInfoPanel({ socket, userName, userColor, isMobile = false }: UserInfoPanelProps) {
   const [solAddress, setSolAddress] = useState('')
   const [savedSolAddress, setSavedSolAddress] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [votesRemaining, setVotesRemaining] = useState(10)
   const [, setVotedCards] = useState<string[]>([])
   
-  // Reset function accessible from console
   const handleResetVotes = () => {
     if (confirm('Are you sure you want to reset all your votes? This cannot be undone!')) {
       localStorage.removeItem('votedCards')
@@ -31,7 +30,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
     }
   }
   
-  // Make reset function available in console (silently)
   useEffect(() => {
     window.resetVotes = handleResetVotes
     
@@ -41,14 +39,12 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
   }, [])
   
   useEffect(() => {
-    // Load saved data from localStorage
     const saved = localStorage.getItem('userSolAddress')
     if (saved) {
       setSavedSolAddress(saved)
       setSolAddress(saved)
     }
     
-    // Load voted cards from localStorage
     const voted = localStorage.getItem('votedCards')
     if (voted) {
       const cards = JSON.parse(voted)
@@ -58,14 +54,8 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
   }, [])
   
   useEffect(() => {
-    // Listen for successful votes
-    socket.on('voteSuccess', () => {
-      // Vote counting is handled in App.tsx
-    })
-    
-    socket.on('solAddressUpdated', (_data: { success: boolean }) => {
-      // Silently handle success
-    })
+    socket.on('voteSuccess', () => {})
+    socket.on('solAddressUpdated', (_data: { success: boolean }) => {})
     
     return () => {
       socket.off('voteSuccess')
@@ -73,7 +63,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
     }
   }, [socket])
   
-  // Update votes remaining when votedCards changes
   useEffect(() => {
     const handleStorageChange = () => {
       const voted = localStorage.getItem('votedCards')
@@ -84,10 +73,8 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
       }
     }
     
-    // Listen for localStorage changes
     window.addEventListener('storage', handleStorageChange)
     
-    // Also check periodically for changes from same tab
     const interval = setInterval(() => {
       const voted = localStorage.getItem('votedCards')
       if (voted) {
@@ -108,8 +95,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
       localStorage.setItem('userSolAddress', solAddress.trim())
       setSavedSolAddress(solAddress.trim())
       setIsEditing(false)
-      
-      // Send to backend
       socket.emit('updateSolAddress', { address: solAddress.trim() })
     }
   }
@@ -117,6 +102,102 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
   const handleEdit = () => {
     setIsEditing(true)
     setSolAddress(savedSolAddress)
+  }
+  
+  if (isMobile) {
+    return (
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 40,
+        background: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(20px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: userColor
+            }} />
+            <div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#fff'
+              }}>
+                {userName}
+              </div>
+              <div style={{
+                fontSize: '11px',
+                color: 'rgba(255, 255, 255, 0.5)'
+              }}>
+                {savedSolAddress ? `${savedSolAddress.slice(0, 4)}...${savedSolAddress.slice(-4)}` : 'No wallet'}
+              </div>
+            </div>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '20px',
+                fontWeight: 700,
+                color: votesRemaining > 0 ? '#34C759' : '#FF3B30'
+              }}>
+                {votesRemaining}
+              </div>
+              <div style={{
+                fontSize: '10px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Votes
+              </div>
+            </div>
+            
+            {!savedSolAddress && (
+              <button
+                onClick={() => {
+                  const address = prompt('Enter your SOL address for rewards:')
+                  if (address) {
+                    setSolAddress(address)
+                    handleSaveSolAddress()
+                  }
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: 600
+                }}
+              >
+                Add Wallet
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
   
   return (
@@ -137,7 +218,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
         overflow: 'hidden',
         width: '320px'
       }}>
-        {/* Header with Identity and Votes */}
         <div 
           style={{
             padding: '16px',
@@ -148,7 +228,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
             background: `linear-gradient(135deg, ${userColor}15, ${userColor}05)`
           }}
         >
-          {/* Identity Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '8px',
@@ -177,7 +256,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
             </div>
           </div>
           
-          {/* Votes Section */}
           <div style={{
             textAlign: 'right',
             paddingRight: '4px'
@@ -201,7 +279,6 @@ export default function UserInfoPanel({ socket, userName, userColor }: UserInfoP
           </div>
         </div>
         
-        {/* SOL Address Section */}
         <div style={{
           padding: '16px'
         }}>

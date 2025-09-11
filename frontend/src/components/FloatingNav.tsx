@@ -4,9 +4,108 @@ interface FloatingNavProps {
   activeUsers: number
   connected: boolean
   tokenCA?: string
+  isMobile?: boolean
 }
 
-export default function FloatingNav({ activeUsers, connected, tokenCA }: FloatingNavProps) {
+export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile = false }: FloatingNavProps) {
+  if (isMobile) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(20px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          height: '56px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              background: 'linear-gradient(135deg, #FF3B30 0%, #FF6B35 100%)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              boxShadow: '0 2px 8px rgba(255, 59, 48, 0.3)'
+            }}>
+              💀
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#fff', letterSpacing: '-0.5px' }}>
+                $FUKD
+              </div>
+              <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)' }}>
+                {activeUsers} online
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              style={{
+                background: 'rgba(255, 59, 48, 0.15)',
+                border: '1px solid rgba(255, 59, 48, 0.3)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                color: '#FF6B35',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onClick={() => {
+                if (tokenCA && tokenCA !== 'Coming Soon') {
+                  navigator.clipboard.writeText(tokenCA)
+                  alert('CA copied!')
+                }
+              }}
+            >
+              <span>CA</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+              </svg>
+            </button>
+            
+            <a 
+              href="https://t.me/rekdtoken" 
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: 'linear-gradient(135deg, #2AABEE, #229ED9)',
+                color: '#fff',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: 600,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                textDecoration: 'none'
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.828.941z"/>
+              </svg>
+              TG
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div style={{

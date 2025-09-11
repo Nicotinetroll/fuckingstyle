@@ -23,6 +23,7 @@ interface VoteCardProps {
   onHover: (id: string | null) => void
   onVote: (id: string) => void
   isTop?: boolean
+  isMobile?: boolean
 }
 
 export default function VoteCard({
@@ -37,7 +38,8 @@ export default function VoteCard({
   votesRemaining,
   onHover,
   onVote,
-  isTop = false
+  isTop = false,
+  isMobile = false
 }: VoteCardProps) {
   const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100) : 0
   const hasVoted = votesForThisCard > 0
@@ -45,6 +47,190 @@ export default function VoteCard({
   const isSecond = isTop && index === 1
   const isThird = isTop && index === 2
   const rank = !isTop ? index + 4 : index + 1
+
+  if (isTop && isMobile) {
+    return (
+      <motion.div
+        layoutId={card.id}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ 
+          layout: { duration: 0.5, type: "spring" },
+          delay: index * 0.05 
+        }}
+        style={{
+          position: 'relative',
+          animation: votedCard === card.id ? 'voteShake 0.6s ease-in-out' : 'none'
+        }}
+      >
+        <div style={{
+          position: 'relative',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02))',
+          backdropFilter: 'blur(30px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(150%)',
+          borderRadius: '20px',
+          padding: '24px',
+          border: isFirst 
+            ? '1px solid rgba(255, 215, 0, 0.3)'
+            : isSecond
+            ? '1px solid rgba(192, 192, 192, 0.2)'
+            : '1px solid rgba(205, 127, 50, 0.2)',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '12px',
+            left: '16px',
+            background: isFirst 
+              ? 'linear-gradient(135deg, #FFD700, #FFA500)' 
+              : isSecond 
+              ? 'linear-gradient(135deg, #E5E5E5, #B8B8B8)'
+              : 'linear-gradient(135deg, #CD7F32, #B87333)',
+            color: '#000',
+            padding: '4px 12px',
+            borderRadius: '100px',
+            fontSize: '10px',
+            fontWeight: 800,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
+          }}>
+            {index === 0 ? '1ST' : index === 1 ? '2ND' : '3RD'}
+          </div>
+          
+          {hasVoted && (
+            <div style={{
+              position: 'absolute',
+              top: '12px',
+              right: '16px',
+              background: 'rgba(52, 199, 89, 0.2)',
+              color: '#34C759',
+              padding: '4px 8px',
+              borderRadius: '100px',
+              fontSize: '10px',
+              fontWeight: 600
+            }}>
+              ✓ {votesForThisCard}x
+            </div>
+          )}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              position: 'relative',
+              flexShrink: 0
+            }}>
+              <img
+                src={card.image}
+                alt={card.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '3px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255,255,255,0.1)'
+                }}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/80?text=' + card.name.charAt(0)
+                }}
+              />
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                color: '#fff',
+                margin: '0 0 4px 0'
+              }}>
+                {card.name}
+              </h3>
+              <p style={{
+                fontSize: '11px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                margin: '0 0 8px 0'
+              }}>
+                {card.role}
+              </p>
+              <div style={{
+                display: 'flex',
+                gap: '12px'
+              }}>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#34C759'
+                }}>
+                  ↑ {card.scammerProfit}
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#FF3B30'
+                }}>
+                  ↓ {card.investorLoss}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{
+            marginTop: '20px',
+            paddingTop: '16px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '12px'
+            }}>
+              <div>
+                <div style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: '#fff'
+                }}>
+                  {voteCount}
+                </div>
+                <div style={{
+                  fontSize: '11px',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  votes • {percentage.toFixed(1)}%
+                </div>
+              </div>
+              <motion.button
+                whileTap={votesRemaining > 0 ? { scale: 0.95 } : {}}
+                onClick={() => onVote(card.id)}
+                disabled={votesRemaining === 0}
+                style={{
+                  padding: '10px 24px',
+                  background: votesRemaining === 0
+                    ? 'rgba(255, 59, 48, 0.15)'
+                    : isFirst
+                    ? 'linear-gradient(135deg, #FFD700, #FFA500)'
+                    : isSecond
+                    ? 'linear-gradient(135deg, #E5E5E5, #B8B8B8)'
+                    : 'linear-gradient(135deg, #CD7F32, #B87333)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: votesRemaining === 0 ? 'rgba(255, 255, 255, 0.4)' : (isFirst || isSecond || isThird) ? '#000' : '#fff',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: votesRemaining === 0 ? 'not-allowed' : 'pointer',
+                  opacity: votesRemaining === 0 ? 0.5 : 1
+                }}
+              >
+                {hasVoted ? `Voted (${votesForThisCard}x)` : votesRemaining === 0 ? 'No Votes' : 'Vote'}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
 
   if (!isTop) {
     return (
@@ -57,8 +243,8 @@ export default function VoteCard({
           layout: { duration: 0.5, type: "spring" },
           delay: index * 0.03 
         }}
-        onHoverStart={() => onHover(card.id)}
-        onHoverEnd={() => onHover(null)}
+        onHoverStart={() => !isMobile && onHover(card.id)}
+        onHoverEnd={() => !isMobile && onHover(null)}
         style={{
           position: 'relative',
           animation: votedCard === card.id ? 'voteShake 0.6s ease-in-out' : 'none'
@@ -66,17 +252,17 @@ export default function VoteCard({
       >
         <div style={{
           position: 'relative',
-          background: isHovered 
+          background: isHovered && !isMobile
             ? 'rgba(255, 255, 255, 0.08)' 
             : 'rgba(255, 255, 255, 0.04)',
           backdropFilter: 'blur(20px) saturate(150%)',
           WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-          borderRadius: '16px',
-          padding: '16px',
-          border: isHovered 
+          borderRadius: isMobile ? '12px' : '16px',
+          padding: isMobile ? '12px' : '16px',
+          border: isHovered && !isMobile
             ? '1px solid rgba(255, 255, 255, 0.2)'
             : '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: isHovered 
+          boxShadow: isHovered && !isMobile
             ? '0 10px 30px rgba(0, 0, 0, 0.3)' 
             : '0 4px 12px rgba(0, 0, 0, 0.2)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -101,16 +287,16 @@ export default function VoteCard({
           
           <div style={{
             position: 'absolute',
-            top: '8px',
-            right: '8px',
+            top: isMobile ? '6px' : '8px',
+            right: isMobile ? '6px' : '8px',
             background: 'rgba(255, 255, 255, 0.1)',
-            width: '24px',
-            height: '24px',
+            width: isMobile ? '20px' : '24px',
+            height: isMobile ? '20px' : '24px',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '11px',
+            fontSize: isMobile ? '10px' : '11px',
             fontWeight: 700,
             color: 'rgba(255, 255, 255, 0.6)'
           }}>
@@ -120,26 +306,26 @@ export default function VoteCard({
           {hasVoted && (
             <div style={{
               position: 'absolute',
-              top: '8px',
-              left: '8px',
+              top: isMobile ? '6px' : '8px',
+              left: isMobile ? '6px' : '8px',
               background: 'rgba(52, 199, 89, 0.2)',
-              width: '20px',
-              height: '20px',
+              width: isMobile ? '18px' : '20px',
+              height: isMobile ? '18px' : '20px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '12px',
+              fontSize: isMobile ? '10px' : '12px',
               color: '#34C759'
             }}>
               {votesForThisCard}
             </div>
           )}
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
             <div style={{
-              width: '48px',
-              height: '48px',
+              width: isMobile ? '40px' : '48px',
+              height: isMobile ? '40px' : '48px',
               flexShrink: 0,
               position: 'relative'
             }}>
@@ -160,9 +346,9 @@ export default function VoteCard({
               />
             </div>
             
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, textAlign: isMobile ? 'center' : 'left' }}>
               <h4 style={{
-                fontSize: '14px',
+                fontSize: isMobile ? '12px' : '14px',
                 fontWeight: 600,
                 color: '#fff',
                 margin: 0,
@@ -172,29 +358,33 @@ export default function VoteCard({
               }}>
                 {card.name}
               </h4>
-              <p style={{
-                fontSize: '11px',
-                color: 'rgba(255, 255, 255, 0.5)',
-                margin: 0,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                {card.role}
-              </p>
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                marginTop: '4px',
-                fontSize: '10px'
-              }}>
-                <span style={{ color: '#34C759' }}>
-                  ↑{card.scammerProfit}
-                </span>
-                <span style={{ color: '#FF3B30' }}>
-                  ↓{card.investorLoss}
-                </span>
-              </div>
+              {!isMobile && (
+                <>
+                  <p style={{
+                    fontSize: '11px',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {card.role}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginTop: '4px',
+                    fontSize: '10px'
+                  }}>
+                    <span style={{ color: '#34C759' }}>
+                      ↑{card.scammerProfit}
+                    </span>
+                    <span style={{ color: '#FF3B30' }}>
+                      ↓{card.investorLoss}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           
@@ -202,38 +392,38 @@ export default function VoteCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: '12px',
-            paddingTop: '12px',
+            marginTop: isMobile ? '8px' : '12px',
+            paddingTop: isMobile ? '8px' : '12px',
             borderTop: '1px solid rgba(255, 255, 255, 0.05)'
           }}>
             <div>
               <div style={{
-                fontSize: '18px',
+                fontSize: isMobile ? '14px' : '18px',
                 fontWeight: 700,
                 color: '#fff'
               }}>
                 {voteCount}
                 <span style={{
-                  fontSize: '11px',
+                  fontSize: isMobile ? '9px' : '11px',
                   color: 'rgba(255, 255, 255, 0.4)',
-                  marginLeft: '6px',
+                  marginLeft: '4px',
                   fontWeight: 400
                 }}>
-                  votes ({percentage.toFixed(1)}%)
+                  {isMobile ? `${percentage.toFixed(0)}%` : `votes (${percentage.toFixed(1)}%)`}
                 </span>
               </div>
             </div>
             
             <motion.button
-              whileHover={{ scale: votesRemaining > 0 ? 1.05 : 1 }}
-              whileTap={{ scale: votesRemaining > 0 ? 0.95 : 1 }}
+              whileHover={!isMobile && votesRemaining > 0 ? { scale: 1.05 } : {}}
+              whileTap={votesRemaining > 0 ? { scale: 0.95 } : {}}
               onClick={() => onVote(card.id)}
               disabled={votesRemaining === 0}
               style={{
-                padding: '6px 16px',
+                padding: isMobile ? '4px 12px' : '6px 16px',
                 background: votesRemaining === 0
                   ? 'rgba(255, 59, 48, 0.15)'
-                  : isHovered 
+                  : isHovered && !isMobile
                   ? 'rgba(255, 255, 255, 0.2)'
                   : 'rgba(255, 255, 255, 0.1)',
                 border: votesRemaining === 0
@@ -241,7 +431,7 @@ export default function VoteCard({
                   : '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '8px',
                 color: votesRemaining === 0 ? 'rgba(255, 255, 255, 0.4)' : '#fff',
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 fontWeight: 600,
                 cursor: votesRemaining === 0 ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
@@ -249,7 +439,7 @@ export default function VoteCard({
                 opacity: votesRemaining === 0 ? 0.5 : 1
               }}
             >
-              {hasVoted ? `Voted (${votesForThisCard}x)` : votesRemaining === 0 ? 'No Votes' : 'Vote'}
+              {hasVoted ? `${votesForThisCard}x` : votesRemaining === 0 ? '0' : 'Vote'}
             </motion.button>
           </div>
         </div>

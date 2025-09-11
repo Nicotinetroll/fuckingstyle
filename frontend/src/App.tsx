@@ -36,6 +36,7 @@ function App() {
   const [userName, setUserName] = useState<string>('')
   const [userColor, setUserColor] = useState<string>('#000000')
   const [votedCards, setVotedCards] = useState<string[]>([])
+  const [isMobile, setIsMobile] = useState(false)
   
   const allCards: Card[] = [
     {
@@ -171,6 +172,15 @@ function App() {
   ]
   
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  useEffect(() => {
     const storedUserId = localStorage.getItem('userId')
     const storedVotedCards = localStorage.getItem('votedCards')
     
@@ -261,16 +271,70 @@ function App() {
   const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0)
   const votesRemaining = 10 - votedCards.length
 
-  return (
-    <div style={{
+  const mobileStyles = {
+    container: {
       width: '100vw',
       minHeight: '100vh',
       background: '#000000',
-      overflowX: 'hidden',
-      overflowY: 'auto',
-      position: 'relative',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-    }}>
+      position: 'relative' as const,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
+      paddingBottom: isMobile ? '80px' : '0'
+    },
+    content: {
+      position: 'relative' as const,
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'center',
+      padding: isMobile ? '20px 12px 40px 12px' : '40px 20px',
+      zIndex: 1
+    },
+    header: {
+      textAlign: 'center' as const,
+      marginBottom: isMobile ? '40px' : '60px',
+      marginTop: isMobile ? '80px' : '100px',
+      zIndex: 1
+    },
+    title: {
+      fontSize: isMobile ? '32px' : 'clamp(36px, 8vw, 72px)',
+      fontWeight: 900,
+      background: 'linear-gradient(180deg, #FF3B30 0%, #FF6B35 50%, #FFD700 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      margin: 0,
+      letterSpacing: '-0.03em',
+      lineHeight: 1,
+      textTransform: 'uppercase' as const
+    },
+    subtitle: {
+      fontSize: isMobile ? '14px' : 'clamp(16px, 3vw, 24px)',
+      color: 'rgba(255, 255, 255, 0.5)',
+      marginTop: '16px',
+      fontWeight: 400,
+      letterSpacing: '-0.01em',
+      padding: isMobile ? '0 20px' : '0'
+    },
+    topCardsGrid: {
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+      gap: isMobile ? '24px' : '40px',
+      maxWidth: '1200px',
+      width: '100%',
+      marginBottom: isMobile ? '40px' : '60px'
+    },
+    bottomCardsGrid: {
+      display: 'grid',
+      gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
+      gap: isMobile ? '12px' : '16px',
+      maxWidth: '1200px',
+      width: '100%',
+      marginBottom: '80px'
+    }
+  }
+
+  return (
+    <div style={mobileStyles.container}>
       <div style={{
         position: 'fixed',
         top: 0,
@@ -291,68 +355,31 @@ function App() {
         }} />
       </div>
 
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '40px 20px',
-        zIndex: 1
-      }}>
-        <MultiplayerCursors socket={socket} onUsersUpdate={setActiveUsers} />
-        <FloatingNav activeUsers={activeUsers} connected={connected} tokenCA="DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9" />
-        <VoteNotifications socket={socket} cards={allCards} />
-        {userName && <UserInfoPanel socket={socket} userName={userName} userColor={userColor} />}
+      <div style={mobileStyles.content}>
+        {!isMobile && <MultiplayerCursors socket={socket} onUsersUpdate={setActiveUsers} />}
+        <FloatingNav activeUsers={activeUsers} connected={connected} tokenCA="DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9" isMobile={isMobile} />
+        {!isMobile && <VoteNotifications socket={socket} cards={allCards} />}
+        {userName && <UserInfoPanel socket={socket} userName={userName} userColor={userColor} isMobile={isMobile} />}
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          style={{ 
-            textAlign: 'center', 
-            marginBottom: '60px',
-            marginTop: '100px',
-            zIndex: 1
-          }}
+          style={mobileStyles.header}
         >
-          <h1 style={{
-            fontSize: 'clamp(36px, 8vw, 72px)',
-            fontWeight: 900,
-            background: 'linear-gradient(180deg, #FF3B30 0%, #FF6B35 50%, #FFD700 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            margin: 0,
-            letterSpacing: '-0.03em',
-            lineHeight: 1,
-            textTransform: 'uppercase'
-          }}>
+          <h1 style={mobileStyles.title}>
             We Got Fucking REKD
           </h1>
-          <p style={{
-            fontSize: 'clamp(16px, 3vw, 24px)',
-            color: 'rgba(255, 255, 255, 0.5)',
-            marginTop: '16px',
-            fontWeight: 400,
-            letterSpacing: '-0.01em'
-          }}>
+          <p style={mobileStyles.subtitle}>
             Vote for the most legendary crypto scams in fucking.style • {votesRemaining} votes left
           </p>
         </motion.div>
 
-        <div id="vote">
+        <div id="vote" style={{ width: '100%', maxWidth: '1200px' }}>
           <AnimatePresence mode="popLayout">
             <motion.div 
               layout
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '40px',
-                maxWidth: '1200px',
-                width: '100%',
-                marginBottom: '60px'
-              }}
+              style={mobileStyles.topCardsGrid}
             >
               {topCards.map((card, index) => (
                 <VoteCard
@@ -369,6 +396,7 @@ function App() {
                   onHover={setHoveredCard}
                   onVote={handleVote}
                   isTop={true}
+                  isMobile={isMobile}
                 />
               ))}
             </motion.div>
@@ -385,14 +413,7 @@ function App() {
           <AnimatePresence mode="popLayout">
             <motion.div 
               layout
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '16px',
-                maxWidth: '1200px',
-                width: '100%',
-                marginBottom: '80px'
-              }}
+              style={mobileStyles.bottomCardsGrid}
             >
               {bottomCards.map((card, index) => (
                 <VoteCard
@@ -409,145 +430,15 @@ function App() {
                   onHover={setHoveredCard}
                   onVote={handleVote}
                   isTop={false}
+                  isMobile={isMobile}
                 />
               ))}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        <RewardsSection />
+        <RewardsSection isMobile={isMobile} />
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 0.8; }
-          50% { opacity: 1; }
-        }
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes fireGlow {
-          0%, 100% { 
-            opacity: 0.6;
-            transform: scale(1);
-          }
-          50% { 
-            opacity: 1;
-            transform: scale(1.1);
-          }
-        }
-        @keyframes fireFlicker {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.8; }
-        }
-        @keyframes voteShake {
-          0%, 100% { transform: translateX(0) rotate(0deg); }
-          10% { transform: translateX(-3px) rotate(-0.5deg); }
-          20% { transform: translateX(3px) rotate(0.5deg); }
-          30% { transform: translateX(-3px) rotate(-0.5deg); }
-          40% { transform: translateX(3px) rotate(0.5deg); }
-          50% { transform: translateX(0) rotate(0deg) scale(1.02); }
-          60% { transform: translateX(0) rotate(0deg) scale(1); }
-        }
-        
-        @keyframes slideShine {
-          0% { 
-            transform: translateX(-100%) rotate(25deg);
-          }
-          100% {
-            transform: translateX(200%) rotate(25deg);
-          }
-        }
-        
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-          /* Top 3 cards - single column */
-          div[style*="gridTemplateColumns: repeat(3, 1fr)"] {
-            grid-template-columns: 1fr !important;
-            gap: 24px !important;
-          }
-          
-          /* Bottom 10 cards - 2 columns */
-          div[style*="gridTemplateColumns: repeat(5, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-          }
-          
-          /* Rewards milestones - 2 columns */
-          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-          }
-          
-          /* Winners section - single column */
-          div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
-            grid-template-columns: 1fr !important;
-          }
-          
-          /* How to qualify - single column */
-          div[style*="gridTemplateColumns: repeat(3, 1fr)"][style*="gap: 24px"] {
-            grid-template-columns: 1fr !important;
-            gap: 16px !important;
-          }
-          
-          /* Hide multiplayer cursors on mobile */
-          .notifications-container {
-            display: none !important;
-          }
-          
-          /* Adjust main padding */
-          div[style*="padding: 40px 20px"] {
-            padding: 20px 12px !important;
-          }
-          
-          /* Smaller margins */
-          div[style*="marginTop: 100px"] {
-            margin-top: 80px !important;
-          }
-          
-          div[style*="marginBottom: 60px"] {
-            margin-bottom: 40px !important;
-          }
-        }
-        
-        /* Small mobile (iPhone SE, etc) */
-        @media (max-width: 375px) {
-          /* Even smaller text */
-          h1[style*="fontSize: clamp"] {
-            font-size: clamp(28px, 7vw, 48px) !important;
-          }
-          
-          /* Bottom cards - single column on very small screens */
-          div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
-            grid-template-columns: 1fr !important;
-          }
-          
-          /* Rewards milestones - single column */
-          div[style*="gridTemplateColumns: repeat(2, 1fr)"][style*="gap: 12px"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-        
-        /* Tablet optimizations */
-        @media (min-width: 769px) and (max-width: 1024px) {
-          /* Top 3 cards stay as 3 */
-          /* Bottom 10 cards - 3 columns */
-          div[style*="gridTemplateColumns: repeat(5, 1fr)"] {
-            grid-template-columns: repeat(3, 1fr) !important;
-          }
-          
-          /* Rewards milestones - 2 columns */
-          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        
-        /* Large desktop - keep original */
-        @media (min-width: 1025px) {
-          /* Everything stays as designed */
-        }
-      `}</style>
     </div>
   )
 }
