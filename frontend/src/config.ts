@@ -12,7 +12,7 @@ export const CONFIG = {
   TELEGRAM_LINK: "https://t.me/wegotfuckingrekt",
   
   // Chart Link (DexScreener, DexTools, Birdeye, etc.)
-  CHART_LINK: "https://pump.fun/coin/6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpumpß",
+  CHART_LINK: "https://pump.fun/coin/6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpump",
   
   // Other Social Links (optional)
   TWITTER_LINK: "", // Optional
