@@ -1,13 +1,13 @@
 import GlassSurface from './GlassSurface'
+import CONFIG from '../config'
 
 interface FloatingNavProps {
   activeUsers: number
   connected: boolean
-  tokenCA?: string
   isMobile?: boolean
 }
 
-export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile = false }: FloatingNavProps) {
+export default function FloatingNav({ activeUsers, connected, isMobile = false }: FloatingNavProps) {
   if (isMobile) {
     return (
       <div style={{
@@ -44,7 +44,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '16px', color: '#fff', letterSpacing: '-0.5px' }}>
-                $FUKD
+                {CONFIG.TOKEN_SYMBOL}
               </div>
               <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)' }}>
                 {activeUsers} online
@@ -67,9 +67,11 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
                 gap: '4px'
               }}
               onClick={() => {
-                if (tokenCA && tokenCA !== 'Coming Soon') {
-                  navigator.clipboard.writeText(tokenCA)
+                if (CONFIG.TOKEN_CA && CONFIG.TOKEN_CA !== 'Coming Soon') {
+                  navigator.clipboard.writeText(CONFIG.TOKEN_CA)
                   alert('CA copied!')
+                } else {
+                  alert('Contract Address coming soon!')
                 }
               }}
             >
@@ -80,7 +82,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
             </button>
             
             <a 
-              href="https://t.me/wegotfuckingrekt" 
+              href={CONFIG.TELEGRAM_LINK} 
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -150,7 +152,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
                 💀
               </div>
               <span style={{ fontWeight: 700, fontSize: '18px', color: '#fff', letterSpacing: '-0.5px' }}>
-                $FUKD
+                {CONFIG.TOKEN_SYMBOL}
               </span>
             </div>
             <div style={{
@@ -199,8 +201,8 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
               onClick={() => {
-                if (tokenCA && tokenCA !== 'Coming Soon') {
-                  navigator.clipboard.writeText(tokenCA)
+                if (CONFIG.TOKEN_CA && CONFIG.TOKEN_CA !== 'Coming Soon') {
+                  navigator.clipboard.writeText(CONFIG.TOKEN_CA)
                   alert('CA copied to clipboard!')
                 } else {
                   alert('Contract Address coming soon!')
@@ -209,7 +211,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
             >
               <span style={{ fontWeight: 700 }}>CA:</span>
               <span style={{ fontSize: '11px', opacity: 0.9, fontFamily: 'monospace' }}>
-                {tokenCA === 'Coming Soon' ? 'Coming Soon' : `${tokenCA?.slice(0, 6)}...${tokenCA?.slice(-4)}`}
+                {CONFIG.TOKEN_CA === 'Coming Soon' ? 'Coming Soon' : `${CONFIG.TOKEN_CA?.slice(0, 6)}...${CONFIG.TOKEN_CA?.slice(-4)}`}
               </span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 'auto' }}>
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -276,38 +278,40 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
               }}
             >Winners</a>
             <div style={{ width: '1px', height: '24px', background: 'rgba(255, 255, 255, 0.2)', margin: '0 8px' }} />
+            {CONFIG.SHOW_CHART_BUTTON && (
+              <a 
+                href={CONFIG.CHART_LINK} 
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textDecoration: 'none',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  borderRadius: '10px',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#fff'
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                </svg>
+                Chart
+              </a>
+            )}
             <a 
-              href="https://dexscreener.com" 
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                textDecoration: 'none',
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: 500,
-                borderRadius: '10px',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fff'
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'
-                e.currentTarget.style.background = 'transparent'
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
-              </svg>
-              Chart
-            </a>
-            <a 
-              href="https://t.me/rekdtoken" 
+              href={CONFIG.TELEGRAM_LINK} 
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -344,4 +348,3 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
     </div>
   )
 }
-
