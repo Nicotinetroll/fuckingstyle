@@ -80,7 +80,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA }: Floatin
                 background: 'rgba(255, 59, 48, 0.15)',
                 border: '1px solid rgba(255, 59, 48, 0.3)',
                 borderRadius: '12px',
-                padding: '8px 16px',
+                padding: '8px 20px',
                 color: '#FF6B35',
                 fontSize: '13px',
                 fontWeight: 600,
@@ -88,7 +88,8 @@ export default function FloatingNav({ activeUsers, connected, tokenCA }: Floatin
                 transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '8px',
+                minWidth: '160px'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255, 59, 48, 0.25)'
@@ -107,11 +108,11 @@ export default function FloatingNav({ activeUsers, connected, tokenCA }: Floatin
                 }
               }}
             >
-              <span>CA:</span>
-              <span style={{ fontSize: '11px', opacity: 0.8 }}>
-                {tokenCA === 'Coming Soon' ? 'Coming Soon' : `${tokenCA?.slice(0, 4)}...${tokenCA?.slice(-4)}`}
+              <span style={{ fontWeight: 700 }}>CA:</span>
+              <span style={{ fontSize: '11px', opacity: 0.9, fontFamily: 'monospace' }}>
+                {tokenCA === 'Coming Soon' ? 'Coming Soon' : `${tokenCA?.slice(0, 6)}...${tokenCA?.slice(-4)}`}
               </span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 'auto' }}>
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
               </svg>
             </button>
