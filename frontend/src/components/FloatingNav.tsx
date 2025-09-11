@@ -80,7 +80,7 @@ export default function FloatingNav({ activeUsers, connected, tokenCA, isMobile 
             </button>
             
             <a 
-              href="https://t.me/rekdtoken" 
+              href="https://t.me/wegotfuckingrekt" 
               target="_blank"
               rel="noopener noreferrer"
               style={{
