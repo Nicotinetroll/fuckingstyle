@@ -238,6 +238,16 @@ function App() {
       setConnected(false)
     })
     
+    socket.on('votesReset', () => {
+      localStorage.removeItem('votedCards')
+      window.location.reload()
+    })
+    
+    socket.on('fullReset', () => {
+      localStorage.clear()
+      window.location.reload()
+    })
+    
     allCards.forEach((card) => {
       fetch(`/api/votes/${card.id}`)
         .then(res => res.json())

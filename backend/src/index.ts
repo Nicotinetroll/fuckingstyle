@@ -26,9 +26,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const activeUsers = new Map();
-const userIdentities = new Map(); // userId -> {name, color, solAddress}
+const userIdentities = new Map();
 
-// Funny name generator arrays
 const adjectives = [
   'Angry', 'Happy', 'Sleepy', 'Bouncy', 'Grumpy', 'Fluffy', 'Sparkly', 'Dizzy', 'Sneaky', 'Giggly',
   'Wobbly', 'Fuzzy', 'Chunky', 'Sassy', 'Cranky', 'Bubbly', 'Wiggly', 'Quirky', 'Nerdy', 'Silly',
@@ -56,7 +55,6 @@ function generateUserId(): string {
   return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Initialize database tables
 async function initDatabase() {
   try {
     await pool.query(`
@@ -78,48 +76,39 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
-  } catch (err) {
-    // Silently handle errors
-  }
+  } catch (err) {}
 }
 
 initDatabase();
 
 io.on('connection', (socket) => {
-  // Wait for user identity from client
   socket.on('identify', async (data) => {
     let userId = data.userId;
     let userName, userColor, solAddress;
     
     if (userId && userIdentities.has(userId)) {
-      // Existing user
       const identity = userIdentities.get(userId);
       userName = identity.name;
       userColor = identity.color;
       solAddress = identity.solAddress;
     } else {
-      // New user - generate identity
       userId = generateUserId();
       userName = generateUniqueName();
       userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
       solAddress = data.solAddress || null;
       
-      // Store in memory
       userIdentities.set(userId, {
         name: userName,
         color: userColor,
         solAddress: solAddress
       });
       
-      // Store in database
       try {
         await pool.query(
           'INSERT INTO user_identities (user_id, name, color, sol_address) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING',
           [userId, userName, userColor, solAddress]
         );
-      } catch (err) {
-        // Silently handle error
-      }
+      } catch (err) {}
     }
     
     activeUsers.set(socket.id, { 
@@ -134,7 +123,6 @@ io.on('connection', (socket) => {
       solAddress: solAddress
     });
     
-    // Send identity back to client
     socket.emit('identity', {
       userId: userId,
       name: userName,
@@ -183,12 +171,10 @@ io.on('connection', (socket) => {
     if (user && data.address) {
       user.solAddress = data.address;
       
-      // Update in memory
       if (userIdentities.has(user.userId)) {
         userIdentities.get(user.userId).solAddress = data.address;
       }
       
-      // Update in database
       try {
         await pool.query(
           'UPDATE user_identities SET sol_address = $1 WHERE user_id = $2',
@@ -208,19 +194,16 @@ io.on('connection', (socket) => {
     }
     
     try {
-      // Insert vote with user_identity
       await pool.query(
         'INSERT INTO votes (card_id, user_id, user_identity) VALUES ($1, $2, $3)',
         [data.cardId, socket.id, user.userId]
       );
       
-      // Get updated count
       const result = await pool.query(
         'SELECT COUNT(*) as count FROM votes WHERE card_id = $1',
         [data.cardId]
       );
       
-      // Broadcast to all clients
       io.emit('voteUpdate', { 
         cardId: data.cardId, 
         count: parseInt(result.rows[0].count),
@@ -240,7 +223,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Load existing user identities on startup
 async function loadUserIdentities() {
   try {
     const result = await pool.query('SELECT * FROM user_identities');
@@ -251,9 +233,7 @@ async function loadUserIdentities() {
         solAddress: row.sol_address
       });
     });
-  } catch (err) {
-    // Silently handle error
-  }
+  } catch (err) {}
 }
 
 loadUserIdentities();
@@ -289,6 +269,80 @@ app.get('/api/votes/:cardId', async (req, res) => {
   }
 });
 
+app.post('/api/admin/reset', async (req, res) => {
+  const { password } = req.body;
+  
+  if (password !== 'fukd-reset-2024') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    await pool.query('DELETE FROM votes');
+    
+    io.emit('votesReset', { message: 'All votes have been reset' });
+    
+    res.json({ 
+      success: true, 
+      message: 'All votes deleted successfully' 
+    });
+  } catch (err) {
+    console.error('Reset error:', err);
+    res.status(500).json({ error: 'Failed to reset votes' });
+  }
+});
+
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const votesResult = await pool.query('SELECT COUNT(*) as total FROM votes');
+    const usersResult = await pool.query('SELECT COUNT(*) as total FROM user_identities');
+    const topCardsResult = await pool.query(`
+      SELECT card_id, COUNT(*) as votes 
+      FROM votes 
+      GROUP BY card_id 
+      ORDER BY votes DESC 
+      LIMIT 5
+    `);
+    
+    res.json({
+      totalVotes: votesResult.rows[0].total,
+      totalUsers: usersResult.rows[0].total,
+      topCards: topCardsResult.rows,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
+
+app.post('/api/admin/reset-users', async (req, res) => {
+  const { password } = req.body;
+  
+  if (password !== 'fukd-reset-2024') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    await pool.query('DELETE FROM votes');
+    await pool.query('DELETE FROM user_identities');
+    
+    userIdentities.clear();
+    
+    io.emit('fullReset', { message: 'All data has been reset' });
+    
+    res.json({ 
+      success: true, 
+      message: 'All votes and users deleted successfully' 
+    });
+  } catch (err) {
+    console.error('Full reset error:', err);
+    res.status(500).json({ error: 'Failed to reset data' });
+  }
+});
+
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Admin endpoints:
+  - GET  /api/admin/stats - Get voting statistics
+  - POST /api/admin/reset - Reset votes only (password: fukd-reset-2024)
+  - POST /api/admin/reset-users - Reset everything (password: fukd-reset-2024)`);
 });
