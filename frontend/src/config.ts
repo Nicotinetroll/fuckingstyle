@@ -3,7 +3,7 @@
 
 export const CONFIG = {
   // Token Contract Address
-  TOKEN_CA: "BmMm27dmqW1TgJVg1hU6dM2Xe3RBjUnrSRQL5n1bpump", // Change this to your token CA
+  TOKEN_CA: "6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpump", // Change this to your token CA
   
   // Token Symbol
   TOKEN_SYMBOL: "$FUKD",
@@ -12,7 +12,7 @@ export const CONFIG = {
   TELEGRAM_LINK: "https://t.me/wegotfuckingrekt",
   
   // Chart Link (DexScreener, DexTools, Birdeye, etc.)
-  CHART_LINK: "https://pump.fun/coin/BmMm27dmqW1TgJVg1hU6dM2Xe3RBjUnrSRQL5n1bpump",
+  CHART_LINK: "https://pump.fun/coin/6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpumpß",
   
   // Other Social Links (optional)
   TWITTER_LINK: "", // Optional
