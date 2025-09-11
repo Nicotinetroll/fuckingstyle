@@ -460,20 +460,92 @@ function App() {
           }
         }
         
-        @media (max-width: 1200px) {
-          div[style*="gridTemplateColumns: 'repeat(5, 1fr)'"] {
-            grid-template-columns: repeat(3, 1fr) !important;
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+          /* Top 3 cards - single column */
+          div[style*="gridTemplateColumns: repeat(3, 1fr)"] {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
+          
+          /* Bottom 10 cards - 2 columns */
+          div[style*="gridTemplateColumns: repeat(5, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          
+          /* Rewards milestones - 2 columns */
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          
+          /* Winners section - single column */
+          div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* How to qualify - single column */
+          div[style*="gridTemplateColumns: repeat(3, 1fr)"][style*="gap: 24px"] {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          
+          /* Hide multiplayer cursors on mobile */
+          .notifications-container {
+            display: none !important;
+          }
+          
+          /* Adjust main padding */
+          div[style*="padding: 40px 20px"] {
+            padding: 20px 12px !important;
+          }
+          
+          /* Smaller margins */
+          div[style*="marginTop: 100px"] {
+            margin-top: 80px !important;
+          }
+          
+          div[style*="marginBottom: 60px"] {
+            margin-bottom: 40px !important;
           }
         }
         
-        @media (max-width: 768px) {
-          div[style*="gridTemplateColumns: 'repeat(5, 1fr)'"] {
-            grid-template-columns: repeat(2, 1fr) !important;
+        /* Small mobile (iPhone SE, etc) */
+        @media (max-width: 375px) {
+          /* Even smaller text */
+          h1[style*="fontSize: clamp"] {
+            font-size: clamp(28px, 7vw, 48px) !important;
           }
           
-          div[style*="gridTemplateColumns: 'repeat(3, 1fr)'"] {
+          /* Bottom cards - single column on very small screens */
+          div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
             grid-template-columns: 1fr !important;
           }
+          
+          /* Rewards milestones - single column */
+          div[style*="gridTemplateColumns: repeat(2, 1fr)"][style*="gap: 12px"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          /* Top 3 cards stay as 3 */
+          /* Bottom 10 cards - 3 columns */
+          div[style*="gridTemplateColumns: repeat(5, 1fr)"] {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+          
+          /* Rewards milestones - 2 columns */
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+        
+        /* Large desktop - keep original */
+        @media (min-width: 1025px) {
+          /* Everything stays as designed */
         }
       `}</style>
     </div>
