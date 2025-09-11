@@ -1,8 +1,9 @@
 // frontend/src/config.ts
+// 🚀 EASY CONFIG - CHANGE VALUES HERE 🚀
 
 export const CONFIG = {
   // Token Contract Address
-  TOKEN_CA: "KOKOT",
+  TOKEN_CA: "Soon", // Change this to your token CA
   
   // Token Symbol
   TOKEN_SYMBOL: "$FUKD",
@@ -11,7 +12,7 @@ export const CONFIG = {
   TELEGRAM_LINK: "https://t.me/wegotfuckingrekt",
   
   // Chart Link (DexScreener, DexTools, Birdeye, etc.)
-  CHART_LINK: "https://dexscreener.com/solana/DxF8qKLmpX7YR4bNv9aTcGZ2Jk5Wp3HQs6Fx8nL7aN9",
+  CHART_LINK: "https://fucking.style",
   
   // Other Social Links (optional)
   TWITTER_LINK: "", // Optional
@@ -19,9 +20,9 @@ export const CONFIG = {
   WEBSITE_LINK: "", // Optional
   
   // Backend Settings
-  BACKEND_URL: process.env.NODE_ENV === 'production' 
-    ? 'https://fucking.style' 
-    : 'http://localhost:3001',
+  BACKEND_URL: window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001' 
+    : 'https://fucking.style',
   
   // Display Settings
   SHOW_CHART_BUTTON: true,
@@ -38,9 +39,9 @@ export const CONFIG = {
   // Milestones for rewards
   MILESTONES: [
     { mc: '50K MC', reward: '10% Dev Wallet', winners: 3 },
-    { mc: '100K MC', reward: '15% Dev Wallet', winners: 3 },
-    { mc: '250K MC', reward: '20% Dev Wallet', winners: 3 },
-    { mc: '500K MC', reward: '30% Dev Wallet', winners: 3 }
+    { mc: '100K MC', reward: '15% Dev Wallet', winners: 5 },
+    { mc: '250K MC', reward: '20% Dev Wallet', winners: 10 },
+    { mc: '500K MC', reward: '30% Dev Wallet', winners: 20 }
   ]
 }
 
