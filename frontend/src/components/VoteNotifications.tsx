@@ -33,7 +33,7 @@ export default function VoteNotifications({ socket, cards }: VoteNotificationsPr
           voter: data.voter,
           timestamp: Date.now()
         }
-        setNotifications(prev => [newNotif, ...prev].slice(0, 10))
+        setNotifications(prev => [newNotif, ...prev].slice(0, 4)) // Max 4 notifications
         
         // Auto remove after 4 seconds
         setTimeout(() => {
@@ -52,10 +52,10 @@ export default function VoteNotifications({ socket, cards }: VoteNotificationsPr
   return (
     <div className="notifications-container" style={{
       position: 'fixed',
-      top: '20px',
+      top: '100px',
       right: '20px',
-      zIndex: 1000,
-      maxWidth: '400px',
+      zIndex: 40,
+      maxWidth: '420px', // Wider
       pointerEvents: 'none'
     }}>
       {notifications.map((notif, index) => (
@@ -63,50 +63,200 @@ export default function VoteNotifications({ socket, cards }: VoteNotificationsPr
           key={notif.id}
           className="notification-item"
           style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            position: 'relative',
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(24px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(200%)',
             color: '#fff',
-            padding: '12px 20px',
+            padding: '16px 20px',
             marginBottom: '10px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.5)',
+            borderRadius: '16px',
             fontSize: '14px',
-            fontWeight: 600,
-            opacity: 1 - (index * 0.1),
-            animation: 'slideIn 0.3s ease-out, shake 0.5s ease-in-out',
+            fontWeight: 500,
+            opacity: 1 - (index * 0.12),
+            animation: `slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), colorPulse 0.6s ease-out`,
             transform: 'translateX(0)',
-            transition: 'all 0.3s ease',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 0 80px rgba(120, 119, 198, 0)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+            letterSpacing: '-0.01em',
+            overflow: 'hidden'
           }}
         >
-          <span style={{ fontSize: '18px' }}>🔥</span>
-          <span>{notif.voter} voted for {notif.cardName}!</span>
-          <span style={{ fontSize: '18px' }}>💎</span>
+          {/* Animated gradient background overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, rgba(120, 119, 198, 0.15), rgba(255, 119, 198, 0.15), rgba(120, 219, 255, 0.15))',
+            opacity: 0,
+            animation: 'gradientPulse 0.8s ease-out',
+            pointerEvents: 'none'
+          }} />
+          
+          {/* Animated border glow */}
+          <div style={{
+            position: 'absolute',
+            inset: '-1px',
+            background: 'linear-gradient(90deg, #7877C6, #FF77C6, #78DBFF)',
+            borderRadius: '16px',
+            opacity: 0,
+            animation: 'borderGlow 0.6s ease-out',
+            pointerEvents: 'none',
+            zIndex: -1
+          }} />
+          
+          {/* Animated dot with glow */}
+          <div style={{
+            position: 'relative',
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #34C759, #30D158)',
+            flexShrink: 0,
+            boxShadow: '0 0 12px rgba(52, 199, 89, 0.6)',
+            animation: 'dotPulse 0.6s ease-out'
+          }}>
+            {/* Pulse ring */}
+            <div style={{
+              position: 'absolute',
+              inset: '-8px',
+              borderRadius: '50%',
+              border: '2px solid rgba(52, 199, 89, 0.4)',
+              animation: 'ringExpand 0.6s ease-out'
+            }} />
+          </div>
+          
+          {/* Text content */}
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '3px',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.95)',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+            }}>
+              {notif.voter}
+            </div>
+            <div style={{
+              fontSize: '13px',
+              color: 'rgba(255, 255, 255, 0.75)',
+              fontWeight: 400
+            }}>
+              voted for <span style={{ fontWeight: 500 }}>{notif.cardName}</span>
+            </div>
+          </div>
+          
+          {/* Vote count indicator (optional) */}
+          <div style={{
+            padding: '4px 10px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'rgba(255, 255, 255, 0.8)',
+            animation: 'fadeIn 0.6s ease-out 0.2s both'
+          }}>
+            +1
+          </div>
         </div>
       ))}
       
       <style>{`
         @keyframes slideIn {
           from {
-            transform: translateX(400px);
+            transform: translateX(420px) scale(0.9);
             opacity: 0;
           }
           to {
-            transform: translateX(0);
+            transform: translateX(0) scale(1);
             opacity: 1;
           }
         }
         
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10% { transform: translateX(-10px) rotate(-1deg); }
-          20% { transform: translateX(10px) rotate(1deg); }
-          30% { transform: translateX(-10px) rotate(-1deg); }
-          40% { transform: translateX(10px) rotate(1deg); }
-          50% { transform: translateX(0); }
+        @keyframes colorPulse {
+          0% {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 80px rgba(120, 119, 198, 0.4);
+          }
+          50% {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 120px rgba(255, 119, 198, 0.3);
+          }
+          100% {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 80px rgba(120, 119, 198, 0);
+          }
+        }
+        
+        @keyframes gradientPulse {
+          0% {
+            opacity: 0;
+            transform: translateX(-100%);
+          }
+          50% {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+        
+        @keyframes borderGlow {
+          0% {
+            opacity: 0;
+            transform: scale(0.98);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.02);
+          }
+        }
+        
+        @keyframes dotPulse {
+          0% {
+            transform: scale(0);
+          }
+          50% {
+            transform: scale(1.3);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes ringExpand {
+          0% {
+            transform: scale(0);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       `}</style>
     </div>
