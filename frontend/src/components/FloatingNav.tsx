@@ -40,7 +40,7 @@ export default function FloatingNav({ activeUsers, connected, isMobile = false }
               fontSize: '16px',
               boxShadow: '0 2px 8px rgba(255, 59, 48, 0.3)'
             }}>
-              ❤️‍🔥
+              🤍
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '16px', color: '#fff', letterSpacing: '-0.5px' }}>
@@ -149,7 +149,7 @@ export default function FloatingNav({ activeUsers, connected, isMobile = false }
                 color: '#fff',
                 boxShadow: '0 4px 12px rgba(255, 59, 48, 0.3)'
               }}>
-                ❤️‍🔥
+                🤍
               </div>
               <span style={{ fontWeight: 700, fontSize: '18px', color: '#fff', letterSpacing: '-0.5px' }}>
                 {CONFIG.TOKEN_SYMBOL}
