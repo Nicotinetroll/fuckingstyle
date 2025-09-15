@@ -378,7 +378,7 @@ function App() {
           style={mobileStyles.header}
         >
           <h1 style={mobileStyles.title}>
-            We Got Fucking REKD
+            We Got Fucking style
           </h1>
           <p style={mobileStyles.subtitle}>
             Vote for the most legendary crypto scams in fucking.style • {votesRemaining} votes left

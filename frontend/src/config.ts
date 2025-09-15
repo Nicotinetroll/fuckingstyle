@@ -3,16 +3,16 @@
 
 export const CONFIG = {
   // Token Contract Address
-  TOKEN_CA: "6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpump", // Change this to your token CA
+  TOKEN_CA: "Soon", // Change this to your token CA
   
   // Token Symbol
-  TOKEN_SYMBOL: "$FUKD",
+  TOKEN_SYMBOL: "$FCKD",
   
   // Telegram Group Link
   TELEGRAM_LINK: "https://t.me/wegotfuckingrekt",
   
   // Chart Link (DexScreener, DexTools, Birdeye, etc.)
-  CHART_LINK: "https://pump.fun/coin/6cwNtPG77jBYZRzUSwWUS8j7QcYtG3MRJ6akx3bmpump",
+  CHART_LINK: "https://pump.fun/",
   
   // Other Social Links (optional)
   TWITTER_LINK: "", // Optional
