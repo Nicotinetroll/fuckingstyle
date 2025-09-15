@@ -9,7 +9,7 @@ export const CONFIG = {
   TOKEN_SYMBOL: "$FCKD",
   
   // Telegram Group Link
-  TELEGRAM_LINK: "https://t.me/fkinstyle",
+  TELEGRAM_LINK: "https://t.me/fuckingstyle420",
   
   // Chart Link (DexScreener, DexTools, Birdeye, etc.)
   CHART_LINK: "https://pump.fun/",
